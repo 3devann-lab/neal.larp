@@ -13,9 +13,53 @@
 
   const TICK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5 L10.2 16.5 L18 8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+  /** Simon says: watch the squares light up, then repeat the order. Answer: { ok } */
+  function simon(api, cfg) {
+    api.showVerify(false);
+    const n = 9;
+    const colors = ['#ef5350', '#ffa726', '#ffee58', '#66bb6a', '#26c6da', '#42a5f5', '#7e57c2', '#ec407a', '#8d6e63'];
+    const notes = [262, 294, 330, 349, 392, 440, 494, 523, 587];
+    const grid = h('div', { class: 'grid simon', style: { gridTemplateColumns: 'repeat(3, 1fr)' } });
+    const status = h('div', { class: 'simon-status', 'aria-live': 'polite' }, 'Watch…');
+    const cells = Array.from({ length: n }, (_, i) => {
+      const c = h('button', { class: 'tile simon-cell', type: 'button', 'aria-label': 'Square ' + (i + 1) });
+      c.style.setProperty('--c', colors[i]);
+      grid.appendChild(c);
+      return c;
+    });
+    api.body.append(status, grid);
+    let seq = [], pos = 0, input = false;
+    const flash = (i, ms = 420) => {
+      cells[i].classList.add('lit');
+      api.sound.tone(notes[i], ms / 1000, 'triangle', 0.1);
+      api.after(ms, () => cells[i].classList.remove('lit'));
+    };
+    const play = () => {
+      input = false;
+      pos = 0;
+      status.textContent = 'Watch…';
+      seq = [];
+      while (seq.length < (cfg.length || 5)) { const r = Math.floor(Math.random() * n); if (r !== seq[seq.length - 1]) seq.push(r); }
+      seq.forEach((v, k) => api.after(700 + k * 650, () => flash(v)));
+      api.after(700 + seq.length * 650, () => { input = true; status.textContent = 'Your turn. Repeat the order.'; });
+    };
+    cells.forEach((c, i) => c.addEventListener('click', () => {
+      if (!input || api.isLocked()) return;
+      flash(i, 220);
+      if (seq[pos] !== i) { input = false; api.fail(`Square ${pos + 1} was wrong. Watch again.`); return; }
+      pos++;
+      status.textContent = `${pos} / ${seq.length}`;
+      if (pos >= seq.length) { input = false; api.submit({ ok: true }); }
+    }));
+    api.onFail(() => api.after(600, play));
+    api.onReload(play);
+    play();
+  }
+
   Challenges.grid = {
-    render(api) {
-      const cfg = api.level.config || {};
+    render(api, override) {
+      const cfg = override || api.level.config || {};
+      if (cfg.mode === 'simon') return simon(api, cfg);
       const cols = cfg.cols || 3;
       const rows = cfg.rows || cols;
       const n = cols * rows;
@@ -78,6 +122,16 @@
         tiles: tiles.map((t) => ({ tag: t.tag, selected: !!t.sel })),
         selected: tiles.filter((t) => t.sel).map((t) => t.tag),
       }));
+
+      if (cfg.shuffleEvery) {
+        api.every(cfg.shuffleEvery, () => {
+          grid.classList.add('shuffling');
+          api.after(160, () => {
+            shuffle(tiles).forEach((t) => grid.appendChild(t.el));
+            grid.classList.remove('shuffling');
+          });
+        });
+      }
 
       if (cfg.resetOnFail) {
         api.onFail(() => {

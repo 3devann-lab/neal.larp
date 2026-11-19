@@ -262,5 +262,116 @@
     `<path d="M14 27 q6 3 12 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>` +
     `<rect x="2" y="17" width="4" height="8" rx="2" fill="#9db7e6"/><rect x="34" y="17" width="4" height="8" rx="2" fill="#9db7e6"/></svg>`;
 
+
+  // ---------- act 2+ additions ----------
+  A.duck = () => svg('0 0 100 100',
+    `<ellipse cx="50" cy="70" rx="30" ry="6" fill="rgba(0,40,80,.18)"/>` +
+    `<path d="M22 58 Q22 76 46 76 H66 Q82 76 84 60 Q72 64 64 56 Q60 48 50 50 Q34 52 22 58 Z" fill="#ffd23f"/>` +
+    `<circle cx="66" cy="40" r="14" fill="#ffd23f"/>` +
+    `<path d="M78 40 L92 43 L78 47 Z" fill="#ff8c1a"/>` +
+    `<circle cx="70" cy="37" r="2.4" fill="#222"/>` +
+    `<path d="M36 60 Q46 54 56 62" stroke="#f0b400" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    'preserveAspectRatio="xMidYMid meet"');
+
+  A.key = (o = {}) => svg('0 0 100 100',
+    `<rect width="100" height="100" fill="${o.bg || '#efe6d8'}"/>` +
+    `<g transform="rotate(${o.rot || -30} 50 50)">` +
+    `<circle cx="32" cy="50" r="14" fill="none" stroke="${o.color || '#d4a017'}" stroke-width="7"/>` +
+    `<rect x="44" y="46" width="40" height="8" rx="2" fill="${o.color || '#d4a017'}"/>` +
+    `<rect x="70" y="54" width="6" height="10" fill="${o.color || '#d4a017'}"/><rect x="78" y="54" width="5" height="7" fill="${o.color || '#d4a017'}"/></g>`);
+
+  A.robot = (o = {}) => {
+    const c = o.color || ['#90a4ae', '#4a7fd8', '#ef6c00', '#8e24aa', '#43a047', '#e53935'][(o.v || 0) % 6];
+    return svg('0 0 100 100',
+      `<rect width="100" height="100" fill="${o.bg || '#e9eef3'}"/>` +
+      `<rect x="47" y="10" width="6" height="14" fill="#555"/><circle cx="50" cy="10" r="5" fill="#f2b632"/>` +
+      `<rect x="24" y="22" width="52" height="40" rx="10" fill="${c}"/>` +
+      `<circle cx="38" cy="40" r="7" fill="#fff"/><circle cx="62" cy="40" r="7" fill="#fff"/>` +
+      `<circle cx="38" cy="40" r="3" fill="#222"/><circle cx="62" cy="40" r="3" fill="#222"/>` +
+      `<rect x="38" y="51" width="24" height="4" rx="2" fill="#fff"/>` +
+      `<rect x="30" y="64" width="40" height="26" rx="6" fill="${c}"/><circle cx="50" cy="77" r="5" fill="#fff" opacity=".7"/>`);
+  };
+
+  A.cake = () => svg('0 0 100 100', table('#f7dfe8') +
+    `<rect x="24" y="48" width="52" height="26" rx="4" fill="#f5c26b"/>` +
+    `<path d="M24 52 q6 8 13 0 t13 0 t13 0 t13 0 V48 H24Z" fill="#fff"/>` +
+    `<rect x="48" y="30" width="4" height="18" fill="#7fb3ff"/>` +
+    `<path d="M50 22 q5 5 0 9 q-5 -4 0 -9 Z" fill="#ffb300"/>` +
+    `<path d="M50 14 q3 -4 0 -8" stroke="#bbb" stroke-width="1.5" fill="none" opacity=".8"/>`);
+
+  A.rainWindow = () => {
+    let drops = '';
+    for (let i = 0; i < 26; i++) drops += `<path d="M${(i * 37) % 90 + 6} ${(i * 53) % 80 + 8} l-2 7" stroke="#cfe3ff" stroke-width="1.6" stroke-linecap="round"/>`;
+    return svg('0 0 100 100',
+      `<rect width="100" height="100" fill="#6b5a4b"/><rect x="10" y="10" width="80" height="80" fill="#5d7489"/>` + drops +
+      `<path d="M50 10 V90 M10 50 H90" stroke="#6b5a4b" stroke-width="5"/>` +
+      `<rect x="6" y="86" width="88" height="8" fill="#8a7563"/><path d="M70 86 q4 -10 10 -6 q2 4 -2 6 Z" fill="#ffcf8a"/>`);
+  };
+
+  A.balloon = () => svg('0 0 100 100',
+    `<rect width="100" height="100" fill="#bfe1ff"/>` +
+    `<ellipse cx="58" cy="34" rx="16" ry="20" fill="#ff4f6d"/><path d="M58 54 l-3 5 h6 Z" fill="#e23b58"/>` +
+    `<path d="M58 59 q-6 10 2 18 q8 8 -4 20" stroke="#555" stroke-width="1.2" fill="none"/>` +
+    `<ellipse cx="52" cy="27" rx="4" ry="6" fill="#fff" opacity=".45"/>` +
+    `<g fill="#fff" opacity=".9"><ellipse cx="22" cy="72" rx="14" ry="5"/><ellipse cx="30" cy="68" rx="9" ry="5"/></g>`);
+
+  A.beach = () => svg('0 0 100 100',
+    `<rect width="100" height="58" fill="#ffd9a1"/><circle cx="70" cy="50" r="14" fill="#ff9f43"/>` +
+    `<rect y="50" width="100" height="22" fill="#4aa3df"/><path d="M0 60 q10 -3 20 0 t20 0 t20 0 t20 0 t20 0" stroke="#bfe6ff" stroke-width="1.5" fill="none"/>` +
+    `<path d="M0 72 Q50 64 100 72 V100 H0 Z" fill="#f2d39b"/><path d="M14 86 l4 -3 M30 92 l3 2 M76 88 l-4 2" stroke="#d1aa6a" stroke-width="1.5"/>`);
+
+  A.kite = () => svg('0 0 100 100',
+    `<rect width="100" height="100" fill="#cfeaff"/>` +
+    `<path d="M60 12 L78 34 L60 60 L42 34 Z" fill="#ff7043"/><path d="M60 12 V60 M42 34 H78" stroke="#bf360c" stroke-width="1.5"/>` +
+    `<path d="M60 60 q-8 8 0 14 q8 6 -2 12 q-10 6 -24 12" stroke="#555" stroke-width="1.2" fill="none"/>` +
+    `<path d="M58 70 l-5 2 M60 78 l5 2" stroke="#ffca28" stroke-width="3" stroke-linecap="round"/>` +
+    `<rect y="88" width="100" height="12" fill="#8fc46e"/>`);
+
+  A.envelope = () => svg('0 0 100 100', table('#d9cbb8') +
+    `<rect x="20" y="32" width="60" height="40" rx="2" fill="#fff8ee" stroke="#d8c6a8"/>` +
+    `<path d="M20 32 L50 56 L80 32" stroke="#d8c6a8" stroke-width="2" fill="none"/>` +
+    `<path d="M50 48 l-5 -5 a3 3 0 0 1 5 -4 a3 3 0 0 1 5 4 z" fill="#e53950"/>`);
+
+  A.blank = (o = {}) => svg('0 0 100 100', `<rect width="100" height="100" fill="${o.bg || '#f1f1f1'}"/>`);
+
+  A.portrait = (o = {}) => {
+    const v = o.v || 0;
+    const bgs = ['#ffe0b2', '#e1f5fe', '#f3e5f5', '#e8f5e9', '#fff9c4', '#fce4ec', '#e0f2f1', '#ede7f6', '#fbe9e7'];
+    const skins = ['#f1c27d', '#c68642', '#8d5524', '#ffdbac', '#e0ac69', '#a0522d', '#9fa8da', '#80cbc4', '#ffab91'];
+    const shapes = [
+      `<circle cx="50" cy="48" r="24" fill="${skins[v % 9]}"/>`,
+      `<rect x="28" y="24" width="44" height="50" rx="12" fill="${skins[v % 9]}"/>`,
+      `<path d="M50 20 L76 70 H24 Z" fill="${skins[v % 9]}"/>`,
+      `<ellipse cx="50" cy="50" rx="20" ry="28" fill="${skins[v % 9]}"/>`,
+    ];
+    const mouths = ['<path d="M40 60 q10 8 20 0" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>',
+      '<path d="M41 62 h18" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>',
+      '<path d="M40 64 q10 -8 20 0" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>',
+      '<circle cx="50" cy="62" r="4" fill="#333"/>'];
+    const eyes = v % 3 === 0
+      ? '<path d="M38 46 q4 -4 8 0 M54 46 q4 -4 8 0" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      : '<circle cx="42" cy="46" r="3" fill="#333"/><circle cx="58" cy="46" r="3" fill="#333"/>';
+    return svg('0 0 100 100', `<rect width="100" height="100" fill="${bgs[v % 9]}"/>` + shapes[v % 4] + eyes + mouths[(v * 7) % 4] +
+      (v % 4 === 1 ? '<path d="M28 30 q22 -16 44 0" stroke="#5d4037" stroke-width="6" fill="none"/>' : '') +
+      `<path d="M20 100 Q50 76 80 100 Z" fill="${['#3f51b5', '#e91e63', '#009688', '#ff9800'][v % 4]}"/>`);
+  };
+
+  /** Tiny copy of the widget itself. kind: 'checkbox' | 'grid' | 'slider' | 'logo' | 'error' | 'text' */
+  A.miniWidget = (o = {}) => {
+    const k = o.kind || 'checkbox';
+    let inner = '';
+    if (k === 'checkbox') inner = `<rect x="12" y="34" width="76" height="32" rx="2" fill="#f9f9f9" stroke="#ccc"/><rect x="18" y="42" width="14" height="14" rx="1.5" fill="#fff" stroke="#bbb" stroke-width="1.5"/><rect x="38" y="47" width="30" height="4" rx="2" fill="#999"/><circle cx="79" cy="47" r="5" fill="#4a7fd8"/>`;
+    if (k === 'checked') inner = `<rect x="12" y="34" width="76" height="32" rx="2" fill="#f9f9f9" stroke="#ccc"/><path d="M18 49 l5 5 l9 -11" stroke="#1f9d55" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="38" y="47" width="30" height="4" rx="2" fill="#999"/><circle cx="79" cy="47" r="5" fill="#4a7fd8"/>`;
+    if (k === 'grid') { inner = `<rect x="18" y="12" width="64" height="76" fill="#fff" stroke="#ccc"/><rect x="21" y="15" width="58" height="14" fill="#3f7fe0"/>`; for (let i = 0; i < 9; i++) inner += `<rect x="${22 + (i % 3) * 19}" y="${32 + Math.floor(i / 3) * 17}" width="17" height="15" fill="${['#9ccf7a', '#bfdcf5', '#e8b46a'][(i * 5) % 3]}"/>`; }
+    if (k === 'slider') inner = `<rect x="12" y="30" width="76" height="40" fill="#fff" stroke="#ccc"/><rect x="18" y="52" width="64" height="10" rx="2" fill="#eef1f4"/><rect x="40" y="50" width="14" height="14" rx="2" fill="#fff" stroke="#bbb"/><rect x="18" y="36" width="64" height="12" fill="#ffd3a5"/>`;
+    if (k === 'logo') inner = A.logo().replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" aria-hidden="true">', '<g transform="translate(25 25) scale(1.25)">').replace('</svg>', '</g>');
+    if (k === 'text') inner = `<rect x="12" y="28" width="76" height="44" fill="#fff" stroke="#ccc"/><path d="M18 46 q6 -10 12 0 t12 0 t12 0 t12 0" stroke="#445" stroke-width="2.5" fill="none"/><rect x="18" y="58" width="64" height="8" fill="#fff" stroke="#bbb"/>`;
+    return svg('0 0 100 100', `<rect width="100" height="100" fill="${o.bg || '#eceff3'}"/>` + inner);
+  };
+
+  /** Any emoji as a tile. */
+  A.emoji = (o = {}) => svg('0 0 100 100',
+    `<rect width="100" height="100" fill="${o.bg || '#f4f6f8'}"/><text x="50" y="54" font-size="${o.size || 58}" text-anchor="middle" dominant-baseline="middle">${o.e || '❓'}</text>`);
+
   window.ART = A;
 })();

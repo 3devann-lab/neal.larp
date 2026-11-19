@@ -1,4 +1,4 @@
-# I'm Still Not a Robot — Design Plan (approved)
+# I'm Still Not a Robot — Design Plan (approved, fully implemented)
 
 ## Challenge types (reusable, one file each in `/challenges`)
 

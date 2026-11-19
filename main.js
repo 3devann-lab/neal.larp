@@ -266,7 +266,7 @@
     closeModal();
     timerPaused = false;
     const level = BY_ID[String(id)];
-    if (!level) { showEndOfBuild(); return; }
+    if (!level) { showCredits(); return; }
     const idx = mainIndex(level);
     if (!level.secret) state.current = level.id;
     state.started = true;
@@ -337,6 +337,7 @@
     const foot = h('div', { class: 'captcha-foot' }, h('div', { class: 'foot-icons' }, reloadBtn, audioBtn, infoBtn), verify);
     const widget = h('div', { class: 'captcha', role: 'group', 'aria-label': 'Verification challenge' }, head, err, body, foot);
     renderPrompt(head, level.prompt);
+    if (level.config && level.config.widgetClass) widget.classList.add(...level.config.widgetClass.split(' '));
     slot.appendChild(widget);
 
     reloadBtn.addEventListener('click', () => { if (ctx.reloadFn && !ctx.locked) { Sound.click(); clearError(); ctx.reloadFn(); } });
@@ -352,11 +353,11 @@
 
     const clearError = () => { err.textContent = ''; };
 
-    const doFail = (msg) => {
+    const doFail = (msg, opts = {}) => {
       if (ctx.locked || ctx.dead) return;
       state.fails[level.id] = (state.fails[level.id] || 0) + 1;
       state.mistakes++;
-      state.suspicion = clamp(state.suspicion + 12, 0, 100);
+      state.suspicion = clamp(state.suspicion + (opts.soft ? 3 : 12), 0, 100);
       if (state.suspicion >= 100) unlock('maxsus');
       Sound.error();
       widget.classList.remove('shake');
@@ -430,6 +431,11 @@
         ctx.rafs.push(requestAnimationFrame(step));
       },
       isLocked() { return ctx.locked || ctx.dead; },
+      setHeadVisible(b) { head.hidden = !b; },
+      foot,
+      save,
+      /** Append an element outside the widget (removed when the level ends). */
+      mountOutside(el, parent) { (parent || document.body).appendChild(el); ctx.cleanups.push(() => el.remove()); return el; },
       flavor: setFlavor,
       toast,
       unlock,
@@ -481,7 +487,7 @@
     let target;
     if (replay || level.secret) target = MAIN[state.furthest];
     else target = MAIN[mainIndex(level) + 1];
-    if (!target) { showEndOfBuild(); return; }
+    if (!target) { showCredits(); return; }
     startLevel(target.id);
   }
 
@@ -511,26 +517,128 @@
     };
   }
 
-  // ---------------------------------------------------------------- end of build (temporary until all acts exist)
-  function showEndOfBuild() {
+  // ---------------------------------------------------------------- credits & share card
+  function finishRun() {
+    if (state.finished) return;
+    state.finished = true;
+    state.finishedAt = Date.now();
+    unlock('finished');
+    if (state.elapsed < 15 * 60 * 1000) unlock('speedrun');
+    if (!state.flags.usedHint) unlock('nohints');
+    save();
+  }
+
+  function shareText() {
+    const n = Object.keys(state.achievements).length;
+    return `I'm Still Not a Robot ✅\n⏱️ ${fmtTime(state.elapsed)} · ❌ ${state.mistakes} mistakes · 🏆 ${n}/${ACHIEVEMENTS.length} achievements · 🗝️ ${PLANNED_SECRETS.filter((x) => state.secrets[x]).length}/5 secrets\nVerdict: ${verdict()}`;
+  }
+  function verdict() {
+    if (state.mistakes === 0) return 'Suspiciously perfect.';
+    if (state.mistakes < 10) return 'Probably human.';
+    if (state.mistakes < 30) return 'Human-ish. Close enough.';
+    return 'Extremely, chaotically human.';
+  }
+
+  function drawShareCard() {
+    const W = 1200, H = 630;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const font = (w, px) => `${w} ${px}px Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif`;
+    g.fillStyle = '#f3f4f6'; g.fillRect(0, 0, W, H);
+    // card
+    g.fillStyle = '#fff'; g.strokeStyle = '#d3d3d3'; g.lineWidth = 2;
+    g.fillRect(60, 60, W - 120, H - 120); g.strokeRect(60, 60, W - 120, H - 120);
+    g.fillStyle = '#3f7fe0'; g.fillRect(76, 76, W - 152, 150);
+    g.fillStyle = '#fff'; g.font = font(400, 30); g.fillText('Verification complete', 110, 128);
+    g.font = font(700, 58); g.fillText("I'm Still Not a Robot", 110, 192);
+    // checkmark
+    g.strokeStyle = '#1f9d55'; g.lineWidth = 12; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.beginPath(); g.arc(1010, 395, 92, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.moveTo(962, 398); g.lineTo(997, 432); g.lineTo(1062, 362); g.stroke();
+    // stats
+    const n = Object.keys(state.achievements).length;
+    const rows = [
+      ['⏱️', 'Time', fmtTime(state.elapsed)],
+      ['❌', 'Mistakes', String(state.mistakes)],
+      ['🏆', 'Achievements', `${n} / ${ACHIEVEMENTS.length}`],
+      ['🗝️', 'Secrets', `${PLANNED_SECRETS.filter((x) => state.secrets[x]).length} / 5`],
+    ];
+    rows.forEach((r, i) => {
+      const y = 300 + i * 62;
+      g.font = font(400, 34); g.fillStyle = '#202124'; g.fillText(r[0], 110, y);
+      g.fillStyle = '#5f6368'; g.fillText(r[1], 165, y);
+      g.fillStyle = '#202124'; g.font = font(700, 34); g.fillText(r[2], 420, y);
+    });
+    g.font = font(400, 26); g.fillStyle = '#5f6368';
+    g.fillText('Verdict: ' + verdict(), 110, 548);
+    const icons = ACHIEVEMENTS.filter((a) => state.achievements[a.id]).map((a) => a.icon).join(' ');
+    g.font = font(400, 28); g.fillText(icons.slice(0, 60), 640, 548);
+    return c;
+  }
+
+  function openShare() {
+    const card = drawShareCard();
+    const img = h('img', { class: 'share-img', alt: 'Share card', src: card.toDataURL('image/png') });
+    const copy = h('button', { class: 'btn-primary', type: 'button' }, 'Copy text');
+    const dl = h('a', { class: 'btn-primary', download: 'im-still-not-a-robot.png', href: img.src }, 'Download image');
+    copy.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(shareText()); copy.textContent = 'Copied!'; }
+      catch (e) { copy.textContent = 'Copy failed. Select the text below.'; }
+    });
+    openModal('Share card', h('div', { class: 'share' }, img, h('pre', { class: 'share-text' }, shareText()), h('div', { class: 'share-actions' }, dl, copy)));
+  }
+
+  function showCredits() {
     teardown();
+    finishRun();
     timerPaused = true;
     const slot = $('#widget-slot');
     slot.innerHTML = '';
     $('#result').innerHTML = '';
     $('.hint-row').hidden = true;
     setFlavor('');
-    const unlocked = Object.keys(state.achievements).length;
+    updateHud();
+    $('#level-label').textContent = 'Verified';
+    $('#act-label').textContent = 'The End';
+    const reaction = state.flags.reaction;
+    const lines = [
+      ['Verification', 'Complete. Mutually.'],
+      ['Starring', 'You, a human (probably)'],
+      ['Co-starring', 'stillCAPTCHA, a robot (definitely)'],
+      ['Featuring', 'Three bicycles, one hydrant, four lonely socks and a duck that refused to be clicked'],
+      ['Memory kept', state.memory || 'none (the robot kept one for you)'],
+      ['Your reaction to the twist', reaction || 'unspoken'],
+      ['The robot\'s grade', state.flags.robotPassed === true ? 'Passed. It printed the certificate and framed it.' : state.flags.robotPassed === false ? 'Failed. It is practicing. Quietly.' : 'Pending'],
+      ['Art', 'Hand-drawn SVG, made in code'],
+      ['Sound', 'Synthesized live by your browser'],
+      ['Special thanks', 'Everyone who has ever clicked a traffic light'],
+      ['No robots were harmed', 'One was gently understood'],
+    ];
+    const roll = h('div', { class: 'credits-roll' }, lines.map(([a, b]) => h('div', { class: 'credit' }, h('small', null, a), h('div', null, b))));
+    let robotTaps = 0;
+    const robot = h('button', { class: 'credits-robot', type: 'button', 'aria-label': 'The robot', html: ART.logo() });
+    robot.addEventListener('click', () => {
+      robotTaps++;
+      Sound.tone(500 + robotTaps * 60, 0.08, 'triangle', 0.08);
+      robot.classList.remove('boop'); void robot.offsetWidth; robot.classList.add('boop');
+      if (robotTaps === 10) unlockSecret('S5');
+    });
+    const n = Object.keys(state.achievements).length;
     slot.appendChild(h('div', { class: 'captcha end-card' },
-      h('div', { class: 'captcha-head' }, h('div', { class: 'head-small' }, 'Verification'), h('div', { class: 'head-big' }, 'To be continued…')),
+      h('div', { class: 'captcha-head' }, h('div', { class: 'head-small' }, 'Thank you for verifying'), h('div', { class: 'head-big' }, "We're not robots."), h('div', { class: 'head-sub' }, 'Well. One of us is. And that\'s okay.')),
       h('div', { class: 'end-body' },
-        h('p', null, `You've cleared all ${MAIN.length} levels in this build. More acts are on the way. The CAPTCHA is still deciding what you are.`),
+        robot,
+        h('div', { class: 'credits-window' }, roll),
         h('ul', { class: 'stats' },
           h('li', null, h('b', null, fmtTime(state.elapsed)), ' time'),
           h('li', null, h('b', null, String(state.mistakes)), ' mistakes'),
-          h('li', null, h('b', null, `${unlocked}/${ACHIEVEMENTS.length}`), ' achievements')),
-        h('button', { class: 'btn-primary', type: 'button', onClick: openMenu }, 'Level select'))));
-    $('#level-label').textContent = 'The end (for now)';
+          h('li', null, h('b', null, `${n}/${ACHIEVEMENTS.length}`), ' achievements'),
+          h('li', null, h('b', null, `${PLANNED_SECRETS.filter((x) => state.secrets[x]).length}/5`), ' secrets')),
+        h('div', { class: 'end-actions' },
+          h('button', { class: 'btn-primary', type: 'button', onClick: openShare }, 'Share card'),
+          h('button', { class: 'btn-ghost', type: 'button', onClick: openMenu }, 'Level select'),
+          h('button', { class: 'btn-ghost', type: 'button', onClick: () => { const keep = { achievements: state.achievements, secrets: state.secrets, stats: state.stats, muted: state.muted }; state = Object.assign(fresh(), keep); save(); lastAct = null; startLevel(MAIN[0].id); } }, 'New run')))));
   }
 
   // ---------------------------------------------------------------- menu: level select, achievements, settings
@@ -570,7 +678,8 @@
     });
     const secrets = LEVELS.filter((l) => l.secret && state.secrets[l.id]);
     const found = PLANNED_SECRETS.filter((s) => state.secrets[s]).length;
-    wrap.appendChild(h('h3', null, `Secrets · ${found}/${PLANNED_SECRETS.length} found`));
+    let headTaps = 0;
+    wrap.appendChild(h('h3', { class: 'secrets-head', onClick: () => { if (++headTaps === 8) unlockSecret('S2'); } }, `Secrets · ${found}/${PLANNED_SECRETS.length} found`));
     if (secrets.length) {
       const grid = h('div', { class: 'level-grid' });
       secrets.forEach((l) => grid.appendChild(h('button', {
@@ -641,6 +750,20 @@
     if (e.key === 'Escape') closeModal();
   });
 
+  // swipe down twice on the top area (mobile alternative to ↑↑↓↓)
+  let swipeY = null, swipes = [];
+  document.addEventListener('touchstart', (e) => { const t = e.touches[0]; swipeY = t.clientY < 160 ? t.clientY : null; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (swipeY == null) return;
+    const dy = e.changedTouches[0].clientY - swipeY;
+    swipeY = null;
+    if (dy > 70) {
+      const now = Date.now();
+      swipes = swipes.filter((t) => now - t < 3000).concat(now);
+      if (swipes.length >= 2) unlockSecret('S4');
+    }
+  }, { passive: true });
+
   // ---------------------------------------------------------------- boot
   function boot() {
     $('#btn-menu').addEventListener('click', openMenu);
@@ -676,12 +799,12 @@
       }
     }
     if (!BY_ID[String(startId)] && !jump) startId = (MAIN[state.furthest] || MAIN[MAIN.length - 1]).id;
-    if (state.furthest >= MAIN.length && !jump) showEndOfBuild();
+    if (state.furthest >= MAIN.length && !jump) showCredits();
     else startLevel(startId);
   }
 
   // expose a tiny surface for debugging in the console
-  window.ISNAR = { get state() { return state; }, startLevel, unlock, unlockSecret, LEVELS };
+  window.ISNAR = { get state() { return state; }, startLevel, unlock, unlockSecret, LEVELS, showCredits, openShare };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
