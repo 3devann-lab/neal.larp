@@ -1,4 +1,4 @@
-# I'm Still Not a Robot — Design Plan (draft for approval)
+# I'm Still Not a Robot — Design Plan (approved)
 
 ## Challenge types (reusable, one file each in `/challenges`)
 
@@ -14,7 +14,7 @@
 | `audio` | Web Audio / speech synthesis. Type what you hear, pick a sound. Always has a visual fallback. |
 | `choice` | Multiple choice, incl. Stroop colors, branching dialogue, "no wrong answer". |
 | `hold` | Press-and-hold. Variants: exact duration, any duration, heartbeat. |
-| `sensor` | Optional webcam (motion) / mic (volume). Only after a permission prompt, always skippable. |
+| `sensor` | Optional webcam (motion). Only after a permission prompt, always skippable, with an "I don't have a webcam" alternative challenge. |
 | `scripted` | Escape hatch for one-off UI gags (runaway button, fake loading, crash dialog, settings panel). |
 
 Each level in `levels.js` is `{ id, act, type, prompt, config, validate, hint }`.
@@ -61,7 +61,7 @@ Each level in `levels.js` is `{ id, act, type, prompt, config, validate, hint }`
 33. **scripted** — A "Widget has stopped responding" dialog. Close doesn't help. Turn it off and on again with the tiny power switch.
 34. **choice** — Interrogation: "Have you ever been a robot?" A lie-detector needle tied to the Suspicion Meter. Three questions, every path passes.
 35. **drag** — The blue instruction bar has fallen to the bottom, crumpled. Drag it back up to read the actual task (a grid).
-36. **sensor** — "Wave at the camera" (motion detection) or "Make a noise" (mic). The "I'd rather not" button passes too: "A robot would have said yes."
+36. **sensor** — "Wave at the camera" (webcam motion detection, only after permission). An **"I don't have a webcam"** button swaps in a different challenge: wave your cursor/finger back and forth across the widget 5 times. The same fallback kicks in automatically if no camera is found or permission is denied. "I'd rather not" also passes ("A robot would have said yes.").
 37. **scripted** — A settings panel full of double-negative toggles ("Disable non-human bypass: OFF"). Get the right combination.
 38. **scripted** — Glitch remix: pieces of earlier levels are jumbled together. Check the box, slide the slider and click the duck within 15 s.
 
