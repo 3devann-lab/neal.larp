@@ -954,11 +954,15 @@
       hint: 'Plan turns early, and don’t turn back into yourself. Use the arrow keys, swipe, or the on-screen buttons.',
     },
     {
-      key: 'breakout', type: 'arcade',
-      prompt: { small: 'Too many CAPTCHAs.', big: 'Break them all', sub: 'Every last brick.' },
-      config: { game: 'breakout', bricks: [6, 6, 6, 6], lives: 3 },
-      validate: () => ({ ok: true, msg: 'Wall cleared. Nothing left to verify. (For now.)' }),
-      hint: 'Hit the ball with the edge of the paddle to send it sideways. You get 3 lives before the bricks come back.',
+      key: 'alex', type: 'embed',
+      prompt: { small: 'Something is coming.', big: 'Survive the Alex chase', sub: 'Outrun Alex (Seek) through every room until the door slams. Full screen recommended.' },
+      config: {
+        src: 'assets/games/library/index.html?captcha=alex', source: 'isnar-alex', title: 'Survive Alex', widgetClass: 'wide',
+        goodLuck: 'Run. Don’t look back. (Okay, look back a little.)', retryTip: 'You know the route now.',
+        deathLines: ['Alex caught you. He says hi. Run again!', 'Slimed! Follow the blue orbs this time.', 'Too slow! Hold Space to sprint.'],
+      },
+      validate: (a) => ({ ok: true, msg: a.deaths ? `Outran Alex after ${a.deaths} slimy encounter${a.deaths === 1 ? '' : 's'}. Verified, and slightly sticky.` : 'Outran Alex on the first try. He’s writing a strongly worded review. Verified.' }),
+      hint: 'Walk forward until the chase starts, then hold Space to sprint. Follow the blue Guiding Light orbs, take the lane without slime, and duck (Shift) under beams. Don’t stop until the door slams behind you.',
     },
     {
       key: 'flap', type: 'arcade',
@@ -1005,7 +1009,7 @@
     {
       key: 'library', type: 'embed',
       prompt: { small: 'Special verification:', big: 'Escape the Library', sub: 'Beat Mrs. C’s Library to prove you’re human. Full screen recommended.' },
-      config: { src: 'assets/games/library/index.html?captcha=library', source: 'isnar-library', title: 'Escape the Library', widgetClass: 'wide' },
+      config: { src: 'assets/games/library/index.html?captcha=library', source: 'isnar-library', title: 'Escape the Library', widgetClass: 'wide', goodLuck: 'Good luck. Stay quiet.', retryTip: 'You know where the books are now.', deathLines: ['Mrs. C caught you. Shhh… and try again.', 'Too loud! The library claims another visitor.', 'Caught! Crouch next time.'] },
       validate: (a) => ({ ok: true, msg: a.deaths ? `Escaped after ${a.deaths} encounter${a.deaths === 1 ? '' : 's'} with Mrs. C. Shhh… you’re verified.` : 'Escaped without a single encounter. Mrs. C never even heard you. Verified.' }),
       hint: 'Crouch (Shift) to stay quiet. Read the note on the desk for the symbol order, find the 5 glowing books for the digits, then enter the code on the padlocked exit door and RUN. Throw books (F) to distract her.',
     },
@@ -1582,7 +1586,7 @@
   // ===================================================================================
   const ACTS = [
     [1, ['checkbox', 'bicycles', 'distort', 'hydrant', 'puzzle', 'rotate', 'trustme', 'cones', 'count', 'digits', 'sandwich', 'pairs', 'socks', 'flies', 'dots', 'hold3', 'stopwatch', 'jigsaw', 'round', 'whack', 'clock', 'cups', 'mixer', 'sortfood', 'multicheck']],
-    [2, ['nocat', 'dash1', 'dontclick', 'snake', 'frog', 'light', 'breakout', 'shift', 'flap', 'stopsigns', 'lights', 'reverse', 'dodge', 'human', 'dash2', 'stroop', 'pong', 'catch', 'pipes', 'trace', 'library', 'beat', 'stack', 'mastermind', 'maze', 'darts', 'golf', 'hanoi', 'dash3', 'lander', 'shooter', 'typing', 'rhythm', 'dash4', 'simon']],
+    [2, ['nocat', 'dash1', 'dontclick', 'snake', 'frog', 'light', 'alex', 'shift', 'flap', 'stopsigns', 'lights', 'reverse', 'dodge', 'human', 'dash2', 'stroop', 'pong', 'catch', 'pipes', 'trace', 'library', 'beat', 'stack', 'mastermind', 'maze', 'darts', 'golf', 'hanoi', 'dash3', 'lander', 'shooter', 'typing', 'rhythm', 'dash4', 'simon']],
     [3, ['survey', 'popups', 'runaway', 'cps', 'loading', 'loadbits', 'flipped', 'dashmirror', 'findbox', 'cursor', 'autocorrect', 'tabs', 'tos', 'installer', 'crash', 'nested', 'interrogate', 'lagmaze', 'fallen', 'breakwidget', 'wave', 'volume', 'settings', 'whackerrors', 'snakebanners', 'shootads', 'wires', 'codedigits', 'bells', 'stackwidgets', 'flapverify', 'rhythm2', 'quizreal', 'dash5', 'remix']],
     [4, ['feelings', 'breathe', 'drawfeel', 'mirrordraw', 'memories', 'jigsawbeach', 'keepmemory', 'garden', 'humanslider', 'moodcolor', 'blue', 'cloudshape', 'holdfree', 'kite', 'puddle', 'skipstones', 'wait', 'balance', 'traces', 'dashcalm', 'chords', 'fishing', 'rank', 'worries', 'stars', 'shootingstars', 'pairsfeelings', 'stackcalm', 'letter', 'loop']],
     [5, ['me', 'teach', 'possessed', 'confession', 'repair', 'verifyme', 'design', 'attempt', 'robotquiz', 'robotmaze', 'robotdraw', 'robotrhythm', 'memoryask', 'robotpong', 'robotpipes', 'robotlights', 'robotshield', 'robottower', 'dashduo', 'shaky', 'dashfinal', 'signature', 'heartbeat', 'goodbye', 'final']],

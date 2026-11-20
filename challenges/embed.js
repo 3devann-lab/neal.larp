@@ -4,6 +4,8 @@
  *   source   expected message `source` field (e.g. 'isnar-library')
  *   title    accessible title for the frame
  *   aspect   CSS aspect-ratio of the frame (default '16 / 10')
+ *   deathLines  messages shown when the embedded game reports a death
+ *   retryTip    status text after a restart
  * Messages understood: { source, type: 'started' | 'died' | 'complete' }.
  * Answer: { done: true } when the embedded game reports 'complete'.
  */
@@ -33,11 +35,11 @@
         if (e.source !== frame.contentWindow || !e.data || e.data.source !== cfg.source) return;
         if (api.isLocked()) return;
         const t = e.data.type;
-        if (t === 'started') status.textContent = deaths ? `Attempt ${deaths + 1}. You know where the books are now.` : 'Good luck. Stay quiet.';
+        if (t === 'started') status.textContent = deaths ? `Attempt ${deaths + 1}. ${cfg.retryTip || 'You know what to expect now.'}` : (cfg.goodLuck || 'Good luck.');
         if (t === 'died') {
           deaths++;
           status.textContent = `Caught ${deaths} time${deaths === 1 ? '' : 's'}. Try again from inside the window.`;
-          api.fail(pick(['Mrs. C caught you. Shhh… and try again.', 'Too loud! The library claims another visitor.', 'Caught! Crouch next time.']), { soft: true, suspicion: 1 });
+          api.fail(pick(cfg.deathLines || ['Caught! Try again.']), { soft: true, suspicion: 1 });
         }
         if (t === 'complete') {
           status.textContent = 'You escaped!';

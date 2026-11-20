@@ -81,13 +81,13 @@ Drawn in code (no external images): the arcade minigames are drawn live on canva
 the widget's robot logo, the tiny widget copies (level 52), the toy robots (secret level S1),
 the socks (level 10, which needs exact matching pairs), the blank tile and the emoji tiles.
 
-## Escape the Library (level 46)
+## Survive the Alex chase (level 32) and Escape the Library (level 46)
 `assets/games/library/index.html` is a copy of *Cafeteria & Backrooms: Lunch Rush 3D* from the
 [3devann-lab/random-game](https://github.com/3devann-lab/random-game) repository (DOORS mode, Mrs. C's
-Library). A small "captcha mode" script was added at the end of that copy (only active with
-`?captcha=library`): it starts directly in the library, adds a full-screen button, disables the admin panel
-and reports the result to the CAPTCHA. That game loads three.js and Tailwind from public CDNs, so this one
-level needs an internet connection.
+Library and Alex's Seek chase). A small "captcha mode" script was added at the end of that copy (only active with
+`?captcha=library` or `?captcha=alex`): it starts directly in the library or the first chase room, adds a full-screen button, disables the admin panel
+and reports the result to the CAPTCHA. That game loads three.js and Tailwind from public CDNs, so these two
+levels need an internet connection.
 
 ## Sound
 All sound effects are synthesized at runtime with the Web Audio API. Spoken digits use the

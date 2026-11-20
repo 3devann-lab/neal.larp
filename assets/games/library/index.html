@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script id="isnar-captcha-gfx">
-    // stillCAPTCHA "Escape the Library": LOW graphics by default. The graphics/options settings are kept
+    // stillCAPTCHA challenges (?captcha=library | alex): LOW graphics by default. The graphics/options settings are kept
     // under their own key in captcha mode, so the regular game's settings are never touched.
     (function () {
-        if (new URLSearchParams(location.search).get('captcha') !== 'library') return;
+        var m = new URLSearchParams(location.search).get('captcha'); if (m !== 'library' && m !== 'alex') return;
         var REAL = 'cc_plus_settings', MINE = 'isnar_lib_plus_settings';
         try {
             if (localStorage.getItem(MINE) === null) localStorage.setItem(MINE, JSON.stringify({ quality: 'low' }));
@@ -14873,20 +14873,32 @@ window.__doorsCfgLoaded = true;   // (leave this line alone: it tells the game t
     </style>
 
 <!-- ===================================================================
-     stillCAPTCHA "Escape the Library" mode (only active with ?captcha=library)
-     - single START GAME button, starts directly in Mrs. C's Library (room 50)
+     stillCAPTCHA challenge mode (only active with ?captcha=library or ?captcha=alex)
+     - library: starts in Mrs. C's Library (room 50); win = reach room 51
+     - alex:    starts in the first Seek chase room; win = reach the room after the chase
+     - single START GAME button
      - fullscreen button, admin panel disabled
-     - retry/quit restart the library; entering room 51 = library beaten
-     - tells the parent CAPTCHA page via postMessage({source:'isnar-library', type})
+     - retry/quit restart the challenge
+     - tells the parent CAPTCHA page via postMessage({source:'isnar-<mode>', type})
      =================================================================== -->
 <script id="isnar-captcha">
 (function () {
     'use strict';
     const params = new URLSearchParams(location.search);
-    if (params.get('captcha') !== 'library') return;
-    window.__isnarCaptcha = true;
+    const MODE = params.get('captcha');
+    if (MODE !== 'library' && MODE !== 'alex') return;
+    window.__isnarCaptcha = MODE;
     const LIB = 50;
-    const tell = (type, extra) => { try { window.parent.postMessage(Object.assign({ source: 'isnar-library', type: type }, extra || {}), '*'); } catch (e) { /* ignore */ } };
+    const T = MODE === 'alex' ? {
+        title: '🏃 Survive Alex', blurb: 'Alex is about to crawl out of his slime pool. Run through every room of the chase until the door slams shut behind you.<br><small>WASD move · Space run · Shift duck · follow the blue orbs</small>',
+        start: '🏃 Alex is coming… walk forward, then RUN (hold Space) and follow the blue Guiding Light orbs!', again: '↻ TRY THE CHASE AGAIN', restart: '↻ RESTART THE CHASE',
+        win: '✅ You outran Alex!', winText: 'The door slammed in his slimy face. Head back to the CAPTCHA: you have been verified.'
+    } : {
+        title: '📚 Escape the Library', blurb: 'Find the 5-digit code, unlock the padlock and get out alive. Mrs. C is blind, but she hears everything.<br><small>WASD move · Shift crouch · Space run · E interact · F throw/use</small>',
+        start: '📚 Mrs. C\'s Library. Find the note on the desk, then the 5 glowing books. Crouch (Shift) to stay quiet.', again: '↻ TRY THE LIBRARY AGAIN', restart: '↻ RESTART THE LIBRARY',
+        win: '✅ You escaped the Library!', winText: 'Mrs. C will remember this. Head back to the CAPTCHA: you have been verified.'
+    };
+    const tell = (type, extra) => { try { window.parent.postMessage(Object.assign({ source: 'isnar-' + MODE, type: type }, extra || {}), '*'); } catch (e) { /* ignore */ } };
     const api = () => window.__doorsApi;
 
     const css = document.createElement('style');
@@ -14923,7 +14935,7 @@ window.__doorsCfgLoaded = true;   // (leave this line alone: it tells the game t
     };
     const hide = () => { ov.style.display = 'none'; };
 
-    let done = false, wasDead = false, started = false;
+    let done = false, wasDead = false, started = false, goal = LIB + 1;
     function startLibrary() {
         const A = api();
         if (!A || !window.startDoors) { setTimeout(startLibrary, 200); return; }
@@ -14931,8 +14943,15 @@ window.__doorsCfgLoaded = true;   // (leave this line alone: it tells the game t
         done = false; wasDead = false;
         window.startDoors();
         A.beginRun();
-        A.teleport(LIB, true);
-        A.sub('📚 Mrs. C\'s Library. Find the note on the desk, then the 5 glowing books. Crouch (Shift) to stay quiet.', 6);
+        if (MODE === 'alex') {
+            const n = A.CH1;              // first Seek chase room (rolled from the run's seed)
+            A.teleport(n, true);
+            goal = n + 7;                 // the chase covers n … n+6; reaching n+7 slams the door on Alex
+        } else {
+            A.teleport(LIB, true);
+            goal = LIB + 1;
+        }
+        A.sub(T.start, 6);
         started = true;
         tell('started');
     }
@@ -14943,7 +14962,7 @@ window.__doorsCfgLoaded = true;   // (leave this line alone: it tells the game t
         const fsLink = document.createElement('button');
         fsLink.className = 'sec'; fsLink.textContent = '⛶ Play in full screen';
         fsLink.onclick = () => { goFs(); startLibrary(); };
-        show('📚 Escape the Library', 'Find the 5-digit code, unlock the padlock and get out alive. Mrs. C is blind, but she hears everything.<br><small>WASD move · Shift crouch · Space run · E interact · F throw/use</small>', 'START GAME', startLibrary, fsLink);
+        show(T.title, T.blurb, 'START GAME', startLibrary, fsLink);
     }
 
     function boot() {
@@ -14952,9 +14971,9 @@ window.__doorsCfgLoaded = true;   // (leave this line alone: it tells the game t
         intro();
         // retry / quit buttons restart the library instead of the hotel or main menu
         const swap = (id, label) => { const el = document.getElementById(id); if (!el) return; el.onclick = retry; if (label) el.textContent = label; };
-        swap('dr-retry', '↻ TRY THE LIBRARY AGAIN');
-        swap('dr-quit1', '↻ RESTART THE LIBRARY');
-        swap('dr-quit2', '↻ RESTART THE LIBRARY');
+        swap('dr-retry', T.again);
+        swap('dr-quit1', T.restart);
+        swap('dr-quit2', T.restart);
         swap('dr-quit0');
         // multiplayer is not part of this challenge
         const mp = document.getElementById('dr-mpbtn'); if (mp) mp.style.display = 'none';
@@ -14962,13 +14981,13 @@ window.__doorsCfgLoaded = true;   // (leave this line alone: it tells the game t
         const prevRoom = window.__drRoom;
         window.__drRoom = function (room) {
             if (prevRoom) { try { prevRoom(room); } catch (e) { console.error(e); } }
-            if (!started || done || !room || room.n <= LIB) return;
+            if (!started || done || !room || room.n < goal) return;
             done = true;
             const A = api();
             try { A.S.running = false; } catch (e) { /* ignore */ }
             try { document.exitPointerLock(); } catch (e) { /* ignore */ }
             leaveFs();
-            show('✅ You escaped the Library!', 'Mrs. C will remember this. Head back to the CAPTCHA: you have been verified.', 'Play it again', retry);
+            show(T.win, T.winText, 'Play it again', retry);
             tell('complete');
         };
         setInterval(() => {
