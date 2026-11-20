@@ -129,7 +129,7 @@
   /* config:
    *   floor: course string, one char per 20px column
    *     '.' ground  '^' spike  'A' tall spike  '#' block  '=' tall block  '_' pit
-   *     'o' jump orb (tap in mid-air)  '*' star (calm mode)  'C' checkpoint
+   *     'o' jump orb (tap in mid-air)  'O' jump orb above a pit  '*' star (calm mode)  'C' checkpoint
    *     'G' flip gravity  'F' fly mode (hold to rise)  'R' back to running
    *   ceil:  optional ceiling string: '.' ceiling  'v' hanging spike  'V' tall hanging spike  '#' hanging block  '_' no ceiling
    *   speed (tiles/s, default 8), mirror (draw right-to-left), calm (no death, collect stars),
@@ -161,7 +161,7 @@
 
     const fc = (L, c) => (c < 0 || c >= L.N ? '.' : L.floor[c]);
     const cc = (L, c) => (c < 0 || c >= L.N ? '.' : L.ceil[c]);
-    const floorTop = (L, c) => { const ch = fc(L, c); return ch === '_' ? Infinity : ch === '#' ? L.FLOOR - T : ch === '=' ? L.FLOOR - 2 * T : L.FLOOR; };
+    const floorTop = (L, c) => { const ch = fc(L, c); return ch === '_' || ch === 'O' ? Infinity : ch === '#' ? L.FLOOR - T : ch === '=' ? L.FLOOR - 2 * T : L.FLOOR; };
     const ceilBot = (L, c) => { const ch = cc(L, c); return ch === '_' ? -Infinity : ch === '#' ? L.CEIL + T : L.CEIL; };
     const spikeHit = (L, s) => {
       const c0 = Math.floor(s.x / T), c1 = Math.floor((s.x + P) / T);
@@ -198,7 +198,7 @@
         else if (press && !s.ground) {
           const c0 = Math.floor(s.x / T), c1 = Math.floor((s.x + P) / T);
           for (let c = c0; c <= c1; c++) {
-            if (fc(L, c) !== 'o') continue;
+            if (fc(L, c) !== 'o' && fc(L, c) !== 'O') continue;
             const oy = s.g > 0 ? L.FLOOR - 2.6 * T : L.CEIL + 2.6 * T;
             if (Math.abs(s.y + P / 2 - oy) < 26) { s.vy = -JV * 0.92 * s.g; break; }
           }
@@ -237,7 +237,7 @@
     function botAct(L, s) {
       const DT = 1 / 120, HZN = s.mode === 'fly' ? 84 : 110, K = s.mode === 'fly' ? 6 : 3;
       const bad = new Set();
-      const orbNear = (q) => { const c = Math.floor((q.x + P / 2) / T); return fc(L, c) === 'o' || fc(L, c + 1) === 'o'; };
+      const orbNear = (q) => { const c = Math.floor((q.x + P / 2) / T); return 'oO'.includes(fc(L, c)) || 'oO'.includes(fc(L, c + 1)); };
       const rec = (q, t, prev) => {
         if (q.dead) return false;
         if (q.won || t >= HZN) return true;
@@ -324,7 +324,7 @@
         for (let c = c0; c <= c1; c++) {
           const x = c * T - off, f = fc(L, c), k = cc(L, c);
           if (c >= L.N) { g.fillStyle = 'rgba(31,157,85,.12)'; g.fillRect(x, L.oy, T, laneH); }
-          if (f !== '_') { g.fillStyle = cfg.calm ? '#8d6e63' : '#dfe8f7'; g.fillRect(x, L.FLOOR, T + 0.5, L.oy + laneH - L.FLOOR); g.fillStyle = cfg.calm ? '#6d4c41' : C.blue; g.fillRect(x, L.FLOOR, T + 0.5, 2); }
+          if (f !== '_' && f !== 'O') { g.fillStyle = cfg.calm ? '#8d6e63' : '#dfe8f7'; g.fillRect(x, L.FLOOR, T + 0.5, L.oy + laneH - L.FLOOR); g.fillStyle = cfg.calm ? '#6d4c41' : C.blue; g.fillRect(x, L.FLOOR, T + 0.5, 2); }
           if (k !== '_' && !duo) { g.fillStyle = cfg.calm ? 'rgba(0,0,0,0)' : C.blue; g.fillRect(x, L.oy, T + 0.5, L.CEIL - L.oy); }
           if (f === '#' || f === '=') { const hh = f === '#' ? T : 2 * T; rr(g, x + 1, L.FLOOR - hh + 1, T - 2, hh - 2, 2); g.fillStyle = C.white; g.fill(); g.strokeStyle = '#b8c2d0'; g.lineWidth = 1.5; g.stroke(); }
           if (k === '#') { rr(g, x + 1, L.CEIL + 1, T - 2, T - 2, 2); g.fillStyle = C.white; g.fill(); g.strokeStyle = '#b8c2d0'; g.stroke(); }
@@ -333,7 +333,7 @@
           if (f === 'A') spike(x, L.FLOOR, 2 * T, false);
           if (k === 'v') spike(x, L.CEIL, T, true);
           if (k === 'V') spike(x, L.CEIL, 2 * T, true);
-          if (f === 'o') { const oy = s.g > 0 ? L.FLOOR - 2.6 * T : L.CEIL + 2.6 * T; g.beginPath(); g.arc(x + T / 2, oy, 7, 0, 7); g.fillStyle = C.yellow; g.fill(); g.strokeStyle = '#b07d00'; g.lineWidth = 2; g.stroke(); }
+          if (f === 'o' || f === 'O') { const oy = s.g > 0 ? L.FLOOR - 2.6 * T : L.CEIL + 2.6 * T; g.beginPath(); g.arc(x + T / 2, oy, 7, 0, 7); g.fillStyle = C.yellow; g.fill(); g.strokeStyle = '#b07d00'; g.lineWidth = 2; g.stroke(); }
           if (f === '*' && !s.got[c]) emoji(g, '⭐', x + T / 2, L.FLOOR - 2.4 * T, 16);
           if ('GFR'.includes(f) && f !== '.') { const col = f === 'G' ? C.purple : f === 'F' ? C.green : C.blue; g.fillStyle = col; g.globalAlpha = 0.35; rr(g, x + 3, L.CEIL + 4, T - 6, L.FLOOR - L.CEIL - 8, 8); g.fill(); g.globalAlpha = 1; g.strokeStyle = col; g.lineWidth = 2; g.stroke(); }
           if (f === 'C') { g.fillStyle = C.ink; g.fillRect(x + 8, L.FLOOR - 26, 2, 26); g.fillStyle = C.green; g.beginPath(); g.moveTo(x + 10, L.FLOOR - 26); g.lineTo(x + 20, L.FLOOR - 21); g.lineTo(x + 10, L.FLOOR - 16); g.fill(); }

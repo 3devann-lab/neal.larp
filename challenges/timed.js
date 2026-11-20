@@ -1,7 +1,7 @@
 /* timed — reflex & timing challenges.
  * config.mode:
  *   'dontClick'  survive config.duration s without clicking the box. Answer: { survived }
- *   'moving'     click the moving target (a duck). Misses make it faster. Answer: { hit }
+ *   'moving'     click the moving target (a frog). Misses make it faster. Answer: { hit }
  *   'light'      click when the light turns green. Answer: { ok }
  *   'catch'      tap falling good items, avoid bad ones. config.goal, config.badRate,
  *                config.good/bad (emoji or 'check'/'cross'), config.maxMissed (lose if
@@ -50,7 +50,7 @@
   // ------------------------------------------------------------------ moving duck
   modes.moving = (api, cfg) => {
     const a = arena('pond');
-    const duck = h('button', { class: 'duck', type: 'button', 'aria-label': 'Duck', html: ART.duck() });
+    const duck = h('button', { class: 'duck', type: 'button', 'aria-label': 'Frog', html: ART.frog() });
     a.appendChild(duck);
     for (let i = 0; i < 5; i++) a.appendChild(h('span', { class: 'ripple', style: { left: rand(5, 90) + '%', top: rand(10, 90) + '%', animationDelay: rand(0, 3) + 's' } }));
     api.body.appendChild(a);
@@ -75,7 +75,7 @@
       if (api.isLocked()) return;
       speed = Math.min(speed * 1.18, 90);
       ang += rand(-1.5, 1.5);
-      api.fail(pick(['Missed. The duck is faster now.', 'Quack. (That was mocking.)', 'Missed! It saw you coming.']), { soft: true });
+      api.fail(pick(['Missed. The frog is faster now.', 'Ribbit. (That was mocking.)', 'Missed! It saw you coming.']), { soft: true });
     });
   };
 
@@ -287,6 +287,31 @@
       api.submit({ caught: true });
     });
     a.addEventListener('pointerdown', () => { if (!api.isLocked()) api.fail('Gravity wins that round.', { soft: true }); });
+  };
+
+  // ------------------------------------------------------------------ stopwatch
+  /* config: target (5), tol (0.15), hideAfter (2) */
+  modes.stopwatch = (api, cfg) => {
+    const target = cfg.target || 5, tol = cfg.tol || 0.15;
+    const disp = h('div', { class: 'stopwatch' }, '0.00');
+    const btn = h('button', { class: 'btn-go wide', type: 'button' }, 'START');
+    api.body.appendChild(h('div', { class: 'sw-wrap' }, disp, btn, h('div', { class: 'muted small center' }, `Stop it at exactly ${target.toFixed(2)} s. The display gets shy after ${cfg.hideAfter || 2} s.`)));
+    let t0 = null;
+    api.loop(() => {
+      if (t0 === null) return true;
+      const el = (performance.now() - t0) / 1000;
+      disp.textContent = el < (cfg.hideAfter || 2) ? el.toFixed(2) : '?.??';
+      return true;
+    });
+    const press = () => {
+      if (api.isLocked()) return;
+      if (t0 === null) { t0 = performance.now(); btn.textContent = 'STOP'; api.sound.click(); return; }
+      const el = (performance.now() - t0) / 1000;
+      t0 = null; btn.textContent = 'START'; disp.textContent = el.toFixed(2);
+      api.submit({ t: el, target, tol });
+    };
+    btn.addEventListener('click', press);
+    api.setBot(() => { press(); api.after(target * 1000, press); });
   };
 
   Challenges.timed = {

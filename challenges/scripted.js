@@ -231,9 +231,9 @@
     });
     knob.addEventListener('pointerup', () => { dragging = false; if (!done.slide) knob.style.left = '0'; });
     // duck strip
-    const duck = h('button', { class: 'duck mini', type: 'button', 'aria-label': 'Duck', html: ART.duck() });
+    const duck = h('button', { class: 'duck mini', type: 'button', 'aria-label': 'Frog', html: ART.frog() });
     const strip = h('div', { class: 'arena pond strip' }, duck);
-    const t3 = h('div', { class: 'remix-task col' }, h('div', { class: 'remix-head' }, h('span', { class: 'remix-n' }, '3'), h('span', null, 'Click the duck')), strip);
+    const t3 = h('div', { class: 'remix-task col' }, h('div', { class: 'remix-head' }, h('span', { class: 'remix-n' }, '3'), h('span', null, 'Click the frog')), strip);
     duck.addEventListener('pointerdown', (e) => { e.stopPropagation(); if (api.isLocked() || done.duck) return; duck.classList.add('got'); check('duck', t3); });
     const fill = h('div', { class: 'countdown-fill hot' });
     const label = h('div', { class: 'remix-timer' }, `${dur}s`);

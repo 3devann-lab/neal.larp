@@ -623,7 +623,7 @@
       ['Verification', 'Complete. Mutually.'],
       ['Starring', 'You, a human (probably)'],
       ['Co-starring', 'stillCAPTCHA, a robot (definitely)'],
-      ['Featuring', 'Three bicycles, one hydrant, four lonely socks and a duck that refused to be clicked'],
+      ['Featuring', 'Three bicycles, one hydrant, four lonely socks and a frog that refused to be clicked'],
       ['Memory kept', state.memory || 'none (the robot kept one for you)'],
       ['Your reaction to the twist', reaction || 'unspoken'],
       ['The robot\'s grade', state.flags.robotPassed === true ? 'Passed. It printed the certificate and framed it.' : state.flags.robotPassed === false ? 'Failed. It is practicing. Quietly.' : 'Pending'],

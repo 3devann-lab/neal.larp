@@ -83,8 +83,9 @@
   A.photo = (o = {}) => `<img class="photo${o.round ? ' round' : ''}" src="assets/photos/${o.src}.jpg" alt="${o.alt || ''}" draggable="false" decoding="async">`;
   A.hydrantPhoto = () => A.photo({ src: 'hydrant-split', alt: 'A red fire hydrant on grass' });
   // The moving duck and the puzzle landscape are photos too.
-  // The moving duck and the puzzle-slider landscape are photos too.
+  // The moving frog and the puzzle-slider landscape are photos too.
   A.duck = () => A.photo({ src: 'duck-1', round: true, alt: 'Duck' });
+  A.frog = () => A.photo({ src: 'frog-1', round: true, alt: 'Frog' });
   A.puzzleScene = () => A.photo({ src: 'landscape-1', alt: 'Landscape' });
 
   window.ART = A;
