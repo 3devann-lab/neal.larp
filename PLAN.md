@@ -1,4 +1,9 @@
-# I'm Still Not a Robot — Design Plan (approved, fully implemented)
+# I'm Still Not a Robot — Design Plan
+
+> **Expanded to 150 levels.** The original 62-level plan below is kept for reference; the
+> authoritative run order now lives in the `ACTS` list at the bottom of `levels.js`.
+> Two original levels were changed to avoid overlapping neal.fun's game: "Draw a circle" became
+> "Trace the dotted path", and "Click the duck" became "Click the frog".
 
 ## Challenge types (reusable, one file each in `/challenges`)
 
@@ -110,3 +115,25 @@ Each level in `levels.js` is `{ id, act, type, prompt, config, validate, hint }`
 - Vanilla HTML/CSS/JS as **classic scripts** (no ES modules), so `index.html` works straight from `file://`.
 - `npm run dev` runs a zero-dependency Node static server.
 - All art is inline SVG, CSS or emoji. No external images, so `CREDITS.md` only covers fonts and code (the font is the system stack, so no downloads).
+
+
+## Expansion to 150 levels (88 new)
+Act sizes: I 25 · II 35 · III 35 · IV 30 · V 25. New levels by act:
+
+- **Act I:** rotate the photo, count the bicycles, memory pairs, things that fly, connect-the-dots star,
+  stop the stopwatch at 5.00 s, swap jigsaw, round things (the stop sign is an octagon), whack the robots,
+  set the clock, cup shuffle, mix CAPTCHA blue, sort food / not food.
+- **Act II (arcade):** Checkbox Dash 1–4 (spikes, gaps & orbs, gravity flips, flight), snake, breakout,
+  paper-plane glider, lights-out, dodge pop-ups, pong vs. robot, pipes, road crossing, stacker, colour code
+  breaker, no-touch maze, darts, mini golf, Tower of Hanoi, lander, spam shooter, typing defence, rhythm.
+- **Act III (meta):** pop-up cascade, 25 clicks in 6 s, catch the loading bits, Checkbox Dash mirrored,
+  which cursor is yours, close the other tabs, sneaky installer, nested CAPTCHAs, lagging maze, break the
+  widget, volume knob to 37, whack the errors, snake vs. cookie banners, block the ads, reconnect the wires,
+  PIN code breaker, silence the notifications, tower of checkmarks, fly the Verify button, theme-song rhythm,
+  "which instruction is real?", Checkbox Dash ERROR EDITION.
+- **Act IV (gentle):** breathing, mirror drawing, memory jigsaw, watering, mood colour, cloud shapes, kite,
+  skipping stones, balance, Checkbox Dash sunset run (no death), fishing, letting worries go,
+  constellation, shooting stars, feeling pairs, small tower, note to future you.
+- **Act V (with the robot):** teach it what a cat is, repair it, its quiz about your journey, program its
+  route, duet rhythm, co-op pong, reconnect its heart, light its memory banks, shield it from spam, build it
+  a tower, Checkbox Dash duo, The Final Dash, sign the certificate, "will you come back?".

@@ -11,9 +11,42 @@
   'use strict';
   const { h } = U;
 
+  /** Breathe in (hold) while the circle grows, out (release) while it shrinks. */
+  function breathe(api, cfg) {
+    api.showVerify(false);
+    const IN = cfg.inhale || 4, OUT = cfg.exhale || 4, cycles = cfg.cycles || 3;
+    const orb = h('div', { class: 'breath-orb' });
+    const label = h('div', { class: 'breath-label' }, 'Press and hold to breathe in');
+    const meter = h('div', { class: 'countdown thin' }, h('div', { class: 'countdown-fill calm' }));
+    const zone = h('button', { class: 'breath-zone', type: 'button', 'aria-label': 'Hold to breathe in' }, orb);
+    api.body.appendChild(h('div', { class: 'breath' }, zone, label, meter));
+    let holding = false, started = false, t = 0, inSync = 0, total = 0, bot = false;
+    const down = (e) => { if (e && e.cancelable) e.preventDefault(); holding = true; started = true; };
+    const up = () => { holding = false; };
+    zone.addEventListener('pointerdown', down); zone.addEventListener('pointerup', up); zone.addEventListener('pointercancel', up);
+    zone.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); down(); } });
+    zone.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') up(); });
+    api.setBot(() => { bot = true; started = true; });
+    api.loop((dt) => {
+      if (!started) return true;
+      t += dt;
+      const per = IN + OUT, ph = t % per, inhale = ph < IN;
+      if (bot) holding = inhale;
+      const f = inhale ? ph / IN : 1 - (ph - IN) / OUT;
+      orb.style.transform = `scale(${0.45 + f * 0.55})`;
+      label.textContent = inhale ? 'Breathe in… (hold)' : 'Breathe out… (let go)';
+      total += dt; if (holding === inhale) inSync += dt;
+      meter.firstChild.style.width = Math.min(100, (t / (per * cycles)) * 100) + '%';
+      if (t >= per * cycles) { api.submit({ sync: inSync / total }); return false; }
+      return true;
+    });
+    api.onFail(() => { t = 0; inSync = 0; total = 0; started = false; label.textContent = 'Press and hold to breathe in'; });
+  }
+
   Challenges.hold = {
     render(api) {
       const cfg = api.level.config || {};
+      if (cfg.mode === 'breathe') { breathe(api, cfg); return; }
       const mode = cfg.mode || 'exact';
       api.showVerify(false);
 

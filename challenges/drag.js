@@ -64,7 +64,7 @@
         const slots = [];
 
         shuffle(items).forEach((it) => {
-          const slot = h('div', { class: 'pair-slot', dataset: { id: it.id } },
+          const slot = h('div', { class: 'pair-slot' + (cfg.ghost ? ' ghost' : ''), dataset: { id: it.id } },
             h('div', { class: 'pair-fixed', html: ART[it.art](it.opts) }));
           slots.push(slot);
           targets.appendChild(slot);
@@ -97,6 +97,36 @@
           targets,
           h('div', { class: 'drag-label' }, cfg.trayLabel || 'Loose'),
           tray));
+        return;
+      }
+
+      // -------------------------------------------------- sort into bins
+      if (cfg.mode === 'sort') {
+        const bins = cfg.bins.map((b) => {
+          const zone = h('div', { class: 'sort-bin', dataset: { id: b.id } }, h('div', { class: 'sort-label' }, b.label), h('div', { class: 'sort-drop' }));
+          return { def: b, zone };
+        });
+        const tray = h('div', { class: 'sort-tray' });
+        let left = cfg.items.length;
+        const place = (piece, it, bin) => {
+          if (it.bin !== bin.def.id) { api.fail(cfg.wrongMsg ? cfg.wrongMsg(it, bin.def) : `That doesn’t go in “${bin.def.label}”.`, { soft: true, suspicion: 3 }); return false; }
+          piece.dataset.locked = '1'; piece.style.transform = '';
+          bin.zone.querySelector('.sort-drop').appendChild(piece);
+          api.sound.tick();
+          if (--left === 0) api.after(300, () => api.submit({ done: true }));
+          return true;
+        };
+        const pieces = shuffle(cfg.items).map((it) => {
+          const piece = h('div', { class: 'sort-piece', html: ART[it.art](it.opts || {}) });
+          tray.appendChild(piece);
+          draggable(api, piece, (x, y) => {
+            const bin = bins.find((b) => U.inRect(x, y, b.zone.getBoundingClientRect(), 4));
+            return bin ? place(piece, it, bin) : false;
+          });
+          return { piece, it };
+        });
+        api.body.appendChild(h('div', { class: 'sort-wrap' }, h('div', { class: 'sort-bins' }, bins.map((b) => b.zone)), h('div', { class: 'drag-label' }, 'Drag each picture into the right box'), tray));
+        api.setBot(() => pieces.forEach(({ piece, it }) => place(piece, it, bins.find((b) => b.def.id === it.bin))));
         return;
       }
 

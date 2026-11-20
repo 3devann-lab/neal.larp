@@ -94,6 +94,21 @@
         return;
       }
 
+      // ------------------------------------------------ trace guide / mirror line / signature line
+      let guide = null;
+      if (mode === 'trace') {
+        guide = [];
+        for (let x = 24; x <= W - 24; x += 3) guide.push({ x, y: H / 2 + Math.sin((x - 24) / 38) * 58 * Math.sin(x / 150 + 0.4) });
+      }
+      const decorate = () => {
+        if (guide) { g.save(); g.setLineDash([3, 7]); g.strokeStyle = '#9db7e6'; g.lineWidth = 10; g.beginPath(); guide.forEach((p, i) => (i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y))); g.stroke(); g.restore();
+          g.fillStyle = '#1f9d55'; g.beginPath(); g.arc(guide[0].x, guide[0].y, 6, 0, 7); g.fill(); g.fillStyle = '#d93025'; g.beginPath(); g.arc(guide[guide.length - 1].x, guide[guide.length - 1].y, 6, 0, 7); g.fill(); }
+        if (mode === 'mirror') { g.save(); g.setLineDash([5, 5]); g.strokeStyle = '#c9a4e6'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(W / 2, 0); g.lineTo(W / 2, H); g.stroke(); g.restore(); }
+        if (mode === 'sign') { g.strokeStyle = '#9aa0a6'; g.lineWidth = 1; g.beginPath(); g.moveTo(30, H - 60); g.lineTo(W - 30, H - 60); g.stroke(); g.fillStyle = '#9aa0a6'; g.font = '12px sans-serif'; g.fillText('✕', 22, H - 64); }
+      };
+      decorate();
+      const repaint = () => { paper(g); decorate(); };
+
       // ------------------------------------------------ player draws
       const strokes = [];
       let current = null;
@@ -107,7 +122,7 @@
         if (api.isLocked()) return;
         e.preventDefault();
         try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
-        if (mode === 'circle') { strokes.length = 0; paper(g); ink = 0; readout.textContent = ''; }
+        if (mode === 'circle' || mode === 'trace') { strokes.length = 0; repaint(); ink = 0; readout.textContent = ''; }
         current = [toLocal(e)];
         strokes.push(current);
         api.clearError();
@@ -123,6 +138,7 @@
         g.strokeStyle = cfg.color || '#2b2f6b';
         g.lineWidth = cfg.width || 5;
         g.beginPath(); g.moveTo(q.x, q.y); g.lineTo(p.x, p.y); g.stroke();
+        if (mode === 'mirror') { g.beginPath(); g.moveTo(W - q.x, q.y); g.lineTo(W - p.x, p.y); g.stroke(); }
       });
       const end = () => {
         if (!current) return;
@@ -135,13 +151,31 @@
       };
       canvas.addEventListener('pointerup', end);
       canvas.addEventListener('pointercancel', end);
-      clear.addEventListener('click', () => { strokes.length = 0; ink = 0; paper(g); readout.textContent = ''; sync(); });
+      clear.addEventListener('click', () => { strokes.length = 0; ink = 0; repaint(); readout.textContent = ''; sync(); });
       sync();
 
+      const traceScore = () => {
+        const pts = strokes.flat();
+        if (!pts.length) return { coverage: 0, accuracy: 0 };
+        const near = (a, list, r) => list.some((b) => Math.hypot(a.x - b.x, a.y - b.y) < r);
+        const coverage = guide.filter((p) => near(p, pts, 13)).length / guide.length;
+        const accuracy = pts.filter((p) => near(p, guide, 15)).length / pts.length;
+        return { coverage, accuracy };
+      };
       api.setAnswer(() => (mode === 'circle'
         ? analyseCircle(strokes.reduce((a, b) => (b.length > a.length ? b : a), []))
-        : { ink, strokes: strokes.length }));
-      if (mode === 'circle') api.onFail(() => { strokes.length = 0; ink = 0; paper(g); sync(); });
+        : mode === 'trace' ? traceScore() : { ink, strokes: strokes.length }));
+      if (mode === 'circle' || mode === 'trace') api.onFail(() => { strokes.length = 0; ink = 0; repaint(); sync(); });
+      // bot: draws with real pointer events
+      api.setBot(() => {
+        const r = canvas.getBoundingClientRect();
+        const toClient = (p) => ({ clientX: r.left + (p.x / W) * r.width, clientY: r.top + (p.y / H) * r.height, pointerId: 9, bubbles: true });
+        const path = guide || Array.from({ length: 40 }, (_, i) => ({ x: 40 + i * 5, y: H / 2 + Math.sin(i / 4) * 40 }));
+        canvas.dispatchEvent(new PointerEvent('pointerdown', toClient(path[0])));
+        path.forEach((p) => canvas.dispatchEvent(new PointerEvent('pointermove', toClient(p))));
+        canvas.dispatchEvent(new PointerEvent('pointerup', toClient(path[path.length - 1])));
+        api.verify();
+      });
     },
   };
 })();

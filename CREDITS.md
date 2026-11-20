@@ -38,6 +38,7 @@ were deliberately not used.
 | `duck-1.jpg` | Redhead Duck Drake, Huron Wetland Management District South Dakota | USFWS Mountain Prairie | Public Domain Mark 1.0 ([license](https://creativecommons.org/publicdomain/mark/1.0/)) | [flickr](https://www.flickr.com/photos/51986662@N05/52461291109) |
 | `envelope-1.jpg` | Letter Valentine | Kelly Ishmael | CC0 1.0 (public domain dedication) ([license](https://creativecommons.org/publicdomain/zero/1.0/)) | [stocksnap](https://stocksnap.io/photo/letter-valentine-P2KICW97HO) |
 | `envelope-2.jpg` | Bear Letter | Freestocks.org | CC0 1.0 (public domain dedication) ([license](https://creativecommons.org/publicdomain/zero/1.0/)) | [stocksnap](https://stocksnap.io/photo/bear-letter-8K1VOJGNXF) |
+| `frog-1.jpg` | Free green frog image | Unknown | CC0 1.0 (public domain dedication) ([license](https://creativecommons.org/publicdomain/zero/1.0/)) | [rawpixel](https://www.rawpixel.com/image/5917021/image-background-public-domain-green) |
 | `hotdog-1.jpg` | Italian sausage with mustard | Topher | CC0 1.0 (public domain dedication) ([license](https://creativecommons.org/publicdomain/zero/1.0/)) | [wordpress](https://wordpress.org/photos/photo/579620d3bb/) |
 | `house-1.jpg` | Current condition of historic employee housing exterior (2) | YellowstoneNPS | Public Domain Mark 1.0 ([license](https://creativecommons.org/publicdomain/mark/1.0/)) | [flickr](https://www.flickr.com/photos/80223459@N05/52945835020) |
 | `house-2.jpg` | Kelton House Exterior | More Columbus History | Public Domain Mark 1.0 ([license](https://creativecommons.org/publicdomain/mark/1.0/)) | [flickr](https://www.flickr.com/photos/199683985@N06/54903784316) |
@@ -75,7 +76,8 @@ were deliberately not used.
 The stop-sign tiles (`stop-1`…`stop-3`) are three different crops of the same photo.
 
 ## Original art
-Drawn in code in `assets/art.js` (no external images):
+Drawn in code (no external images): the arcade minigames are drawn live on canvas in
+`challenges/arcade.js`; `assets/art.js` holds
 the widget's robot logo, the tiny widget copies (level 52), the toy robots (secret level S1),
 the socks (level 10, which needs exact matching pairs), the blank tile and the emoji tiles.
 

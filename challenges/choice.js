@@ -136,7 +136,25 @@
         return;
       }
 
+      // ---------------------------------------------------------------- quiz (every round has a right answer)
+      if (cfg.mode === 'quiz') {
+        let i = 0;
+        const round = () => {
+          const r = cfg.rounds[i];
+          show(`${i + 1}/${cfg.rounds.length} · ${r.q}`, r.options, (o) => {
+            if (!o.correct) { api.fail(r.wrong || 'Not quite. Think back…', { soft: true, suspicion: 3 }); return; }
+            api.sound.tone(700 + i * 80, 0.08, 'triangle', 0.07);
+            if (++i >= cfg.rounds.length) api.submit({ done: true });
+            else round();
+          });
+        };
+        round();
+        api.setBot(() => { const t = api.every(60, () => { if (api.isLocked()) { clearInterval(t); return; } const r = cfg.rounds[i]; const k = r.options.findIndex((o) => o.correct); opts.children[k].click(); }); });
+        return;
+      }
+
       // ---------------------------------------------------------------- default
+      if (cfg.image) extra.appendChild(h('div', { class: 'choice-image', html: ART.photo({ src: cfg.image }) }));
       if (cfg.intro) extra.appendChild(h('p', { class: 'choice-intro' }, typeof cfg.intro === 'function' ? cfg.intro(api.state) : cfg.intro));
       const options = typeof cfg.options === 'function' ? cfg.options(api.state) : cfg.options;
       show(cfg.question || '', cfg.shuffle ? shuffle(options) : options, (o) => api.submit(o));
