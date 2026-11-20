@@ -984,7 +984,7 @@
     {
       key: 'dash2', type: 'arcade',
       prompt: { small: 'Checkbox Dash', big: 'Level 2: Mind the gap', sub: 'Yellow orbs give you a mid-air jump.' },
-      config: { game: 'runner', speed: 8, floor: course('........', '...__.......', '...___......', '..#__#......', '..^__^......', '...__O__.......', '...=.=.=......', '...#=#.......', '..C.........', '...___O___......', '..#.#.#......', '..^.^.......', '...__^__......', '..=...=.......', '...___O___O___......', '..........') },
+      config: { game: 'runner', speed: 8, floor: course('........', '...__.......', '...___......', '..#__#......', '..^__.......', '...__O__.......', '...=.=.=......', '...#=#.......', '..C.........', '...___O___......', '..#.#.#......', '..^.^.......', '...#__#......', '..=...=.......', '...___O___O___......', '..........') },
       validate: (a) => ({ ok: true, msg: `Gaps minded. ${a.attempts} attempt${a.attempts === 1 ? '' : 's'}.` }),
       hint: 'Over a long gap, jump, then tap again when you touch a yellow orb to jump in mid-air.',
     },

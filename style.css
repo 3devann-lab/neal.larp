@@ -971,3 +971,8 @@ img.photo { width: 100%; height: 100%; object-fit: cover; display: block; user-s
 
 @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(14px, -10px); } }
 @keyframes rise { to { transform: translateY(-260px); opacity: .2; } }
+
+@media (max-width: 480px) {
+  .tab-strip { flex-wrap: wrap; }
+  .btab { flex: 1 1 42%; border-radius: 6px; margin-bottom: 2px; }
+}

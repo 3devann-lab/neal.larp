@@ -1,7 +1,8 @@
 # I'm Still Not a Robot
 
 A sequel-style browser game made of increasingly absurd CAPTCHA challenges.
-62 levels in 5 acts, 5 secret levels, 15 achievements and a twist ending.
+150 levels in 5 acts (with dozens of arcade minigames and puzzles), 5 secret levels,
+15 achievements and a twist ending.
 Vanilla HTML/CSS/JS, no build step, no dependencies, no backend.
 
 ## Play
@@ -11,9 +12,17 @@ Vanilla HTML/CSS/JS, no build step, no dependencies, no backend.
 Works with mouse, touch and keyboard. Progress is saved in `localStorage`.
 
 ## Features
-- 62 levels across 5 acts: Normal-ish → Rule-bending → Meta → Existential → Finale, plus credits.
-- 12 reusable challenge types in `/challenges`: checkbox, grid, text, slider, drag, timed, draw,
-  audio, choice, hold, sensor (optional webcam, with an "I don't have a webcam" alternative) and scripted.
+- 150 levels across 5 acts: Normal-ish (25) → Rule-bending (35) → Meta (35) → Existential (30) → Finale (25), plus credits.
+- 14 reusable challenge types in `/challenges`: checkbox, grid, text, slider, drag, timed, draw,
+  audio, choice, hold, sensor (optional webcam, with an "I don't have a webcam" alternative), scripted,
+  **arcade** and **puzzle**.
+- Arcade minigames (canvas, mouse/touch/keyboard): *Checkbox Dash* (an auto-runner with gravity flips,
+  flight, orbs, checkpoints and a two-lane co-op mode), snake, breakout, glider, dodge, pong (vs. and co-op),
+  road crossing, stacker, no-touch maze, darts, mini golf, lander, 3-lane rhythm, spam shooter, whack-a-bot,
+  balance beam and timing meters.
+- Puzzles & gags: rotate, count, connect-the-dots, swap jigsaw, memory pairs, cup shuffle, colour mixer,
+  clock, lights-out, pipes, code breaker, Tower of Hanoi, typing defence, robot programming, constellations,
+  pop-up cascade, browser tabs, sneaky installer, nested CAPTCHAs, fake cursors and a volume knob.
 - Robot Suspicion Meter: mistakes raise it and change the tone of the copy (and the colour of the page).
 - 15 achievements, 5 secret levels behind easter eggs.
 - Run timer, level select for cleared levels, share card (PNG + copyable text).
@@ -39,7 +48,9 @@ scripts/        zero-dependency dev server
 ```
 
 ## Adding a level
-Add an object to the `LEVELS` array in `levels.js`; the main run follows array order.
+Add an object with a unique `key` to the `LEVELS` array in `levels.js`, then put its key in the
+`ACTS` run order at the bottom of that file. Ids and acts are assigned from that order.
+`?level=<key>` also works (e.g. `?level=dash1`).
 `validate(answer, ctx)` returns `true`, `false`, or `{ ok, msg }` (`ctx` has `state` and `api`).
 Each challenge file documents its `config` options and answer shape at the top.
 

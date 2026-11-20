@@ -116,10 +116,26 @@
     for (let x = -((off % size) + size) % size; x < W; x += size) { g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, H); g.stroke(); }
     for (let y = 0; y < H; y += size) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(W, y + 0.5); g.stroke(); }
   }
+  /** Word-wrap `s` into lines that fit `maxW` at the current font. */
+  function wrap(g, s, maxW) {
+    const words = s.split(' '), lines = [];
+    let line = '';
+    for (const w of words) { const t = line ? line + ' ' + w : w; if (g.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; }
+    if (line) lines.push(line);
+    return lines;
+  }
   function overlay(g, W, H, title, sub) {
-    g.fillStyle = 'rgba(255,255,255,.78)'; g.fillRect(0, 0, W, H);
-    text(g, title, W / 2, H / 2 - 10, 17, C.ink, 'center', 700);
-    if (sub) text(g, sub, W / 2, H / 2 + 14, 12, C.muted);
+    g.fillStyle = 'rgba(255,255,255,.82)'; g.fillRect(0, 0, W, H);
+    const maxW = W - 24;
+    g.font = `700 16px ${FONT}`;
+    const tl = wrap(g, title, maxW);
+    g.font = `500 12px ${FONT}`;
+    const sl = sub ? wrap(g, sub, maxW) : [];
+    const total = tl.length * 20 + sl.length * 16 + (sl.length ? 6 : 0);
+    let y = H / 2 - total / 2 + 10;
+    tl.forEach((l) => { text(g, l, W / 2, y, 16, C.ink, 'center', 700); y += 20; });
+    y += sl.length ? 4 : 0;
+    sl.forEach((l) => { text(g, l, W / 2, y, 12, C.muted); y += 16; });
   }
   const TAP = matchMedia && matchMedia('(pointer: coarse)').matches ? 'Tap' : 'Click or press Space';
 
@@ -263,7 +279,7 @@
 
     let st = lanes.map(fresh);
     let cps = lanes.map(() => null);
-    let started = false, bot = false, attempts = 1, deadT = 0, beatT = 0, botCount = 0;
+    let started = false, bot = false, attempts = 1, deadT = 0, beatT = 0;
     const parts = [];
     const real = lanes.map((L, i) => ({
       checkpoint: (s) => { cps[i] = Object.assign({}, s, { got: Object.assign({}, s.got) }); if (!cfg.calm) api.sound.tone(880, 0.08, 'triangle', 0.06); },
@@ -292,7 +308,8 @@
           laneIn[i].pressed = false;
         } else { hold = inp.down || inp.pressed; press = inp.pressed; }
         if (bot) {
-          if (botCount++ % 2 === 0 || s.botA === undefined) s.botA = botAct(L, s);
+          s.botN = (s.botN || 0) + 1;
+          if (s.botN % 2 === 1 || s.botA === undefined) s.botA = botAct(L, s);
           hold = s.botA; press = s.botA && !s.prevAct;
         }
         s.prevAct = hold;
