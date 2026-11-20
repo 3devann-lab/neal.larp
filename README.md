@@ -33,7 +33,8 @@ main.js         engine: save/load, HUD, pass/fail, suspicion meter, achievements
                 secrets, hints, timer, menus, credits, share card
 levels.js       level data: { id, act, type, prompt, config, validate, hint }
 challenges/     one reusable challenge type per file
-assets/art.js   original SVG illustrations (drawn in code)
+assets/photos/  public-domain / CC0 photos (sources and licenses in CREDITS.md)
+assets/art.js   photo helper + the few original SVGs (logo, mini widgets, robots, socks)
 scripts/        zero-dependency dev server
 ```
 

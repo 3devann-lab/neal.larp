@@ -16,6 +16,8 @@
 (function () {
   'use strict';
   const { norm } = U;
+  /** Photo tile helper: P('cat-1', 'cat') → { art: 'photo', opts: { src }, tag } */
+  const P = (src, tag) => ({ art: 'photo', tag, opts: { src } });
 
   /** Grid helper: every `need` tile selected, nothing outside need ∪ optional. */
   function gridCheck(ans, need, optional = [], msgs = {}) {
@@ -52,15 +54,8 @@
       config: {
         cols: 3,
         tiles: [
-          { art: 'bicycle', tag: 'bike', opts: { color: '#e53935' } },
-          { art: 'bicycle', tag: 'bike', opts: { color: '#1e88e5' } },
-          { art: 'bicycle', tag: 'bike', opts: { color: '#43a047' } },
-          { art: 'car', opts: { color: '#8e24aa' } },
-          { art: 'tree' },
-          { art: 'house' },
-          { art: 'bench' },
-          { art: 'lamp' },
-          { art: 'cloud' },
+          P('bicycle-1', 'bike'), P('bicycle-2', 'bike'), P('bicycle-3', 'bike'),
+          P('car-1'), P('tree-1'), P('house-1'), P('bench-1'), P('lamp-1'), P('cloud-1'),
         ],
       },
       validate: (a) => gridCheck(a, ['bike']),
@@ -77,17 +72,17 @@
       id: 4, act: 1, type: 'grid',
       prompt: { small: 'Select all squares with', big: 'a fire hydrant', sub: 'If there are none, click skip.' },
       config: {
-        cols: 4, split: 'hydrantScene', resetOnFail: false,
-        // body occupies columns 1–2 in every row; the side nozzles barely reach into row 1, columns 0 and 3
-        splitTags: { 1: 'h', 2: 'h', 5: 'h', 6: 'h', 9: 'h', 10: 'h', 13: 'h', 14: 'h', 4: 'edge', 7: 'edge' },
+        cols: 4, split: 'hydrantPhoto', resetOnFail: false,
+        // photo: the hydrant fills columns 1–2 in every row; its right nozzle tip pokes into row 1, column 3
+        splitTags: { 1: 'h', 2: 'h', 5: 'h', 6: 'h', 9: 'h', 10: 'h', 13: 'h', 14: 'h', 7: 'edge' },
       },
       validate: (a) => {
         const r = gridCheck(a, ['h'], ['edge']);
         if (!r.ok) return r;
         const edges = a.tiles.filter((t) => t.tag === 'edge' && t.selected).length;
-        return { ok: true, msg: edges ? 'You even got the little nozzle tips. Thorough.' : 'You skipped the nozzle tips. Also valid. Philosophically.' };
+        return { ok: true, msg: edges ? 'You even got the tip of the nozzle. Thorough.' : 'You skipped the nozzle tip. Also valid. Philosophically.' };
       },
-      hint: 'The hydrant is two columns wide and runs from the very top row to the bottom row.',
+      hint: 'The hydrant fills the two middle columns, from the top row to the bottom row. The tiny nozzle tip on the right is optional.',
     },
     {
       id: 5, act: 1, type: 'slider',
@@ -111,16 +106,9 @@
       config: {
         cols: 4,
         tiles: [
-          { art: 'trafficCone', tag: 'cone', opts: { v: 0 } },
-          { art: 'trafficCone', tag: 'cone', opts: { v: 2 } },
-          { art: 'iceCream', tag: 'cone', opts: { color: '#ff9ec4' } },
-          { art: 'iceCream', tag: 'cone', opts: { color: '#9be3c4', bg: '#e8f6ff' } },
-          { art: 'pineCone', tag: 'cone' },
-          { art: 'pineCone', tag: 'cone' },
-          { art: 'partyHat', tag: 'hat' },
-          { art: 'tree' }, { art: 'car', opts: { color: '#f9a825' } }, { art: 'bench' }, { art: 'ball' },
-          { art: 'house', opts: { color: '#cfe0f5', roof: '#5a6b8c' } }, { art: 'cloud' }, { art: 'lamp' },
-          { art: 'bicycle', opts: { color: '#6d4c41' } }, { art: 'cat' },
+          P('cone-1', 'cone'), P('cone-2', 'cone'), P('icecream-1', 'cone'), P('icecream-2', 'cone'),
+          P('pinecone-1', 'cone'), P('pinecone-2', 'cone'), P('partyhat-1', 'hat'),
+          P('tree-1'), P('car-3'), P('bench-2'), P('ball-1'), P('house-2'), P('cloud-2'), P('lamp-2'), P('bicycle-4'), P('cat-2'),
         ],
       },
       validate: (a) => {
@@ -143,9 +131,9 @@
       config: {
         cols: 3,
         tiles: [
-          { art: 'sandwich', tag: 'sandwich' }, { art: 'sub', tag: 'sandwich' },
-          { art: 'burger', tag: 'burger' }, { art: 'hotdog', tag: 'hotdog' }, { art: 'taco', tag: 'taco' },
-          { art: 'bicycle', opts: { color: '#ff7043' } }, { art: 'tree' }, { art: 'cat', opts: { color: '#9e9e9e' } }, { art: 'ball', opts: { color: '#42a5f5' } },
+          P('sandwich-1', 'sandwich'), P('sub-1', 'sandwich'),
+          P('burger-1', 'burger'), P('hotdog-1', 'hotdog'), P('taco-1', 'taco'),
+          P('bicycle-2'), P('tree-1'), P('cat-3'), P('ball-2'),
         ],
       },
       validate: (a) => {
@@ -223,10 +211,8 @@
       config: {
         cols: 3,
         tiles: [
-          { art: 'cat', tag: 'cat', opts: { color: '#ff9f43' } }, { art: 'cat', tag: 'cat', opts: { color: '#5d5d5d' } },
-          { art: 'cat', tag: 'cat', opts: { color: '#f5f5f5' } }, { art: 'cat', tag: 'cat', opts: { color: '#c58b4f' } },
-          { art: 'tree', tag: 'x' }, { art: 'car', tag: 'x', opts: { color: '#26a69a' } }, { art: 'bench', tag: 'x' },
-          { art: 'ball', tag: 'x' }, { art: 'house', tag: 'x' },
+          P('cat-1', 'cat'), P('cat-2', 'cat'), P('cat-3', 'cat'), P('cat-4', 'cat'),
+          P('tree-1', 'x'), P('car-2', 'x'), P('bench-1', 'x'), P('ball-1', 'x'), P('house-1', 'x'),
         ],
       },
       validate: (a) => gridCheck(a, ['x'], [], { wrong: 'That one has a cat in it. The cat is offended.', missed: 'You missed a cat-free square.', none: 'Nothing? There are plenty of squares without cats.' }),
@@ -271,13 +257,12 @@
       config: {
         cols: 4, shuffleEvery: 2000,
         tiles: [
-          { art: 'stopSign', tag: 'stop' }, { art: 'stopSign', tag: 'stop', opts: { v: 2 } }, { art: 'stopSign', tag: 'stop', opts: { v: 3 } },
-          { art: 'lamp' }, { art: 'car', opts: { color: '#e53935' } }, { art: 'trafficCone' }, { art: 'bicycle' }, { art: 'tree' },
-          { art: 'house' }, { art: 'bench' }, { art: 'cloud' }, { art: 'car', opts: { color: '#3949ab' } }, { art: 'lamp', opts: { v: 3 } },
-          { art: 'ball', opts: { color: '#d32f2f' } }, { art: 'cat' }, { art: 'trafficCone', opts: { v: 4 } },
+          P('stop-1', 'stop'), P('stop-2', 'stop'), P('stop-3', 'stop'),
+          P('lamp-1'), P('car-1'), P('cone-1'), P('bicycle-1'), P('tree-1'), P('house-2'), P('bench-2'),
+          P('cloud-1'), P('car-3'), P('lamp-2'), P('ball-2'), P('cat-4'), P('cone-2'),
         ],
       },
-      validate: (a) => gridCheck(a, ['stop'], [], { missed: 'A stop sign got away.', wrong: "One of those isn't a stop sign. (The red ball is a ball.)" }),
+      validate: (a) => gridCheck(a, ['stop'], [], { missed: 'A stop sign got away.', wrong: "One of those isn't a stop sign. Red is not enough." }),
       hint: 'Your selections move with the tiles. There are 3 stop signs: tap each once, then Verify.',
     },
     {
@@ -469,8 +454,8 @@
         grid: {
           cols: 3,
           tiles: [
-            { art: 'key', tag: 'key' }, { art: 'key', tag: 'key', opts: { color: '#9e9e9e', rot: 20, bg: '#e3ecf3' } }, { art: 'key', tag: 'key', opts: { color: '#b87333', rot: -60, bg: '#f4e9e1' } },
-            { art: 'envelope' }, { art: 'lamp' }, { art: 'bench' }, { art: 'cat' }, { art: 'house' }, { art: 'balloon' },
+            P('key-1', 'key'), P('key-2', 'key'), P('key-3', 'key'),
+            P('envelope-1'), P('lamp-1'), P('bench-1'), P('cat-1'), P('house-1'), P('balloon-1'),
           ],
         },
       },
@@ -549,8 +534,8 @@
       config: {
         cols: 3,
         tiles: [
-          { art: 'cake', tag: 'm' }, { art: 'rainWindow', tag: 'm' }, { art: 'balloon', tag: 'm' }, { art: 'beach', tag: 'm' },
-          { art: 'kite', tag: 'm' }, { art: 'envelope', tag: 'm' }, { art: 'blank', tag: 'm' }, { art: 'tree', tag: 'm' }, { art: 'cloud', tag: 'm' },
+          P('cake-1', 'm'), P('rain-1', 'm'), P('balloon-1', 'm'), P('beach-1', 'm'),
+          P('kite-1', 'm'), P('envelope-2', 'm'), { art: 'blank', tag: 'm' }, P('tree-1', 'm'), P('cloud-2', 'm'),
         ],
       },
       validate: (a) => {
@@ -642,8 +627,8 @@
     },
     {
       id: 48, act: 4, type: 'grid',
-      prompt: { small: 'Select all squares', big: 'that are you', sub: 'Look closely.' },
-      config: { cols: 3, shuffle: false, tiles: Array.from({ length: 9 }, (_, i) => ({ art: 'portrait', tag: 'p', opts: { v: i } })) },
+      prompt: { small: 'Select all squares', big: 'that are you', sub: 'Footprints, shoes, a favourite mug… which ones feel like you?' },
+      config: { cols: 3, tiles: Array.from({ length: 9 }, (_, i) => P('trace-' + (i + 1), 'p')) },
       validate: (a) => {
         const n = a.selected.length;
         if (!n) return { ok: false, msg: 'You’re in there somewhere. Pick at least one.' };
