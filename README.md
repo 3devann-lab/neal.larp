@@ -32,7 +32,7 @@ Works with mouse, touch and keyboard. Progress is saved in `localStorage`.
 ## Escape the Library
 Level 46 embeds Mrs. C's Library from the DOORS mode of
 [3devann-lab/random-game](https://github.com/3devann-lab/random-game) (copied to `assets/games/library/`).
-It opens straight into the library with a single START GAME button (and full screen); the admin panel is
+It opens straight into the library with a single START GAME button (and full screen), on LOW graphics by default; the admin panel is
 disabled and escaping through the library's exit door verifies you. It loads three.js from a CDN, so it
 needs an internet connection.
 

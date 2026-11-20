@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script id="isnar-captcha-gfx">
+    // stillCAPTCHA "Escape the Library": LOW graphics by default. The graphics/options settings are kept
+    // under their own key in captcha mode, so the regular game's settings are never touched.
+    (function () {
+        if (new URLSearchParams(location.search).get('captcha') !== 'library') return;
+        var REAL = 'cc_plus_settings', MINE = 'isnar_lib_plus_settings';
+        try {
+            if (localStorage.getItem(MINE) === null) localStorage.setItem(MINE, JSON.stringify({ quality: 'low' }));
+            var get = Storage.prototype.getItem, set = Storage.prototype.setItem;
+            Storage.prototype.getItem = function (k) { return get.call(this, k === REAL ? MINE : k); };
+            Storage.prototype.setItem = function (k, v) { return set.call(this, k === REAL ? MINE : k, v); };
+        } catch (e) { /* storage unavailable: the game falls back to its own defaults */ }
+    })();
+    </script>
     <title>Cafeteria & Backrooms: Lunch Rush 3D</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
