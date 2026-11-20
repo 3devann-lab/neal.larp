@@ -29,6 +29,13 @@ Works with mouse, touch and keyboard. Progress is saved in `localStorage`.
 - Hint button unlocks after 3 failed attempts on a level.
 - Synthesized sound effects with a mute toggle.
 
+## Escape the Library
+Level 46 embeds Mrs. C's Library from the DOORS mode of
+[3devann-lab/random-game](https://github.com/3devann-lab/random-game) (copied to `assets/games/library/`).
+It opens straight into the library with a single START GAME button (and full screen), on LOW graphics by default; the admin panel is
+disabled and escaping through the library's exit door verifies you. It loads three.js from a CDN, so it
+needs an internet connection.
+
 ## Debug
 - `?level=N` jumps straight to level N (e.g. `index.html?level=31`); secret levels use `?level=S1`.
 - `?reset` wipes saved progress.

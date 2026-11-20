@@ -1003,11 +1003,11 @@
       hint: 'Start at the tap on the left and follow the lit (blue) pipes. Rotate the next piece until it lights up too.',
     },
     {
-      key: 'crossy', type: 'arcade',
-      prompt: { small: 'Why did the checkbox', big: 'cross the road?', sub: 'To get to the verified side.' },
-      config: { game: 'crossy' },
-      validate: () => ({ ok: true, msg: 'Crossed safely. Look both ways in real life too.' }),
-      hint: 'Wait on the safe (brown) rows until there’s a big gap, then hop. Watch the lane ahead, not your own.',
+      key: 'library', type: 'embed',
+      prompt: { small: 'Special verification:', big: 'Escape the Library', sub: 'Beat Mrs. C’s Library to prove you’re human. Full screen recommended.' },
+      config: { src: 'assets/games/library/index.html?captcha=library', source: 'isnar-library', title: 'Escape the Library', widgetClass: 'wide' },
+      validate: (a) => ({ ok: true, msg: a.deaths ? `Escaped after ${a.deaths} encounter${a.deaths === 1 ? '' : 's'} with Mrs. C. Shhh… you’re verified.` : 'Escaped without a single encounter. Mrs. C never even heard you. Verified.' }),
+      hint: 'Crouch (Shift) to stay quiet. Read the note on the desk for the symbol order, find the 5 glowing books for the digits, then enter the code on the padlocked exit door and RUN. Throw books (F) to distract her.',
     },
     {
       key: 'stack', type: 'arcade',
@@ -1582,7 +1582,7 @@
   // ===================================================================================
   const ACTS = [
     [1, ['checkbox', 'bicycles', 'distort', 'hydrant', 'puzzle', 'rotate', 'trustme', 'cones', 'count', 'digits', 'sandwich', 'pairs', 'socks', 'flies', 'dots', 'hold3', 'stopwatch', 'jigsaw', 'round', 'whack', 'clock', 'cups', 'mixer', 'sortfood', 'multicheck']],
-    [2, ['nocat', 'dash1', 'dontclick', 'snake', 'frog', 'light', 'breakout', 'shift', 'flap', 'stopsigns', 'lights', 'reverse', 'dodge', 'human', 'dash2', 'stroop', 'pong', 'catch', 'pipes', 'trace', 'crossy', 'beat', 'stack', 'mastermind', 'maze', 'darts', 'golf', 'hanoi', 'dash3', 'lander', 'shooter', 'typing', 'rhythm', 'dash4', 'simon']],
+    [2, ['nocat', 'dash1', 'dontclick', 'snake', 'frog', 'light', 'breakout', 'shift', 'flap', 'stopsigns', 'lights', 'reverse', 'dodge', 'human', 'dash2', 'stroop', 'pong', 'catch', 'pipes', 'trace', 'library', 'beat', 'stack', 'mastermind', 'maze', 'darts', 'golf', 'hanoi', 'dash3', 'lander', 'shooter', 'typing', 'rhythm', 'dash4', 'simon']],
     [3, ['survey', 'popups', 'runaway', 'cps', 'loading', 'loadbits', 'flipped', 'dashmirror', 'findbox', 'cursor', 'autocorrect', 'tabs', 'tos', 'installer', 'crash', 'nested', 'interrogate', 'lagmaze', 'fallen', 'breakwidget', 'wave', 'volume', 'settings', 'whackerrors', 'snakebanners', 'shootads', 'wires', 'codedigits', 'bells', 'stackwidgets', 'flapverify', 'rhythm2', 'quizreal', 'dash5', 'remix']],
     [4, ['feelings', 'breathe', 'drawfeel', 'mirrordraw', 'memories', 'jigsawbeach', 'keepmemory', 'garden', 'humanslider', 'moodcolor', 'blue', 'cloudshape', 'holdfree', 'kite', 'puddle', 'skipstones', 'wait', 'balance', 'traces', 'dashcalm', 'chords', 'fishing', 'rank', 'worries', 'stars', 'shootingstars', 'pairsfeelings', 'stackcalm', 'letter', 'loop']],
     [5, ['me', 'teach', 'possessed', 'confession', 'repair', 'verifyme', 'design', 'attempt', 'robotquiz', 'robotmaze', 'robotdraw', 'robotrhythm', 'memoryask', 'robotpong', 'robotpipes', 'robotlights', 'robotshield', 'robottower', 'dashduo', 'shaky', 'dashfinal', 'signature', 'heartbeat', 'goodbye', 'final']],
