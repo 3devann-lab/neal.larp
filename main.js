@@ -7,7 +7,8 @@
   const { h, clamp, pick } = U;
   const $ = (s) => document.querySelector(s);
 
-  const SAVE_KEY = 'isnar-save-v1';
+  const SAVE_KEY = 'isnar-save-v2';
+  const OLD_SAVE_KEYS = ['isnar-save-v1'];
   const ACT_NAMES = { 1: 'Normal-ish', 2: 'Rule-bending', 3: 'Meta', 4: 'Existential', 5: 'Finale' };
   const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
   const PLANNED_SECRETS = ['S1', 'S2', 'S3', 'S4', 'S5'];
@@ -41,7 +42,7 @@
   const LEVELS = window.LEVELS || [];
   const MAIN = LEVELS.filter((l) => !l.secret);
   const BY_ID = {};
-  LEVELS.forEach((l) => { BY_ID[String(l.id)] = l; });
+  LEVELS.forEach((l) => { BY_ID[String(l.id)] = l; if (l.key) BY_ID[l.key] = l; });
   const mainIndex = (l) => MAIN.indexOf(l);
 
   // ---------------------------------------------------------------- state
@@ -68,7 +69,19 @@
   function load() {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return fresh();
+      if (!raw) {
+        // level numbers changed in v2 (62 → 150 levels): carry over only what still makes sense
+        for (const k of OLD_SAVE_KEYS) {
+          const old = localStorage.getItem(k);
+          if (!old) continue;
+          const o = JSON.parse(old);
+          const s = fresh();
+          ['achievements', 'secrets', 'muted'].forEach((f) => { if (o[f] != null) s[f] = o[f]; });
+          s.stats = Object.assign(s.stats, o.stats);
+          return s;
+        }
+        return fresh();
+      }
       const s = Object.assign(fresh(), JSON.parse(raw));
       s.stats = Object.assign(fresh().stats, s.stats);
       return s;
@@ -357,7 +370,7 @@
       if (ctx.locked || ctx.dead) return;
       state.fails[level.id] = (state.fails[level.id] || 0) + 1;
       state.mistakes++;
-      state.suspicion = clamp(state.suspicion + (opts.soft ? 3 : 12), 0, 100);
+      state.suspicion = clamp(state.suspicion + (opts.suspicion != null ? opts.suspicion : opts.soft ? 3 : 12), 0, 100);
       if (state.suspicion >= 100) unlock('maxsus');
       Sound.error();
       widget.classList.remove('shake');
@@ -431,6 +444,10 @@
         ctx.rafs.push(requestAnimationFrame(step));
       },
       isLocked() { return ctx.locked || ctx.dead; },
+      /** Tests / demo: when window.ISNAR_AUTOPLAY is set, challenges may drive themselves with a bot
+       *  that only uses the same inputs a player has. */
+      autoplay: !!window.ISNAR_AUTOPLAY,
+      setBot(fn) { ctx.bot = fn; },
       setHeadVisible(b) { head.hidden = !b; },
       foot,
       save,
@@ -804,7 +821,7 @@
   }
 
   // expose a tiny surface for debugging in the console
-  window.ISNAR = { get state() { return state; }, startLevel, unlock, unlockSecret, LEVELS, showCredits, openShare };
+  window.ISNAR = { get state() { return state; }, startLevel, unlock, unlockSecret, LEVELS, showCredits, openShare, bot() { if (cur && cur.bot) cur.bot(); return !!(cur && cur.bot); } };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
