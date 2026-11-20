@@ -30,7 +30,8 @@ Works with mouse, touch and keyboard. Progress is saved in `localStorage`.
 - Synthesized sound effects with a mute toggle.
 
 ## Escape the Library
-Level 46 embeds Mrs. C's Library from the DOORS mode of
+Level 32 (Survive the Alex chase) and level 46 (Escape the Library) embed scenes from the DOORS mode of
+[3devann-lab/random-game](https://github.com/3devann-lab/random-game): Alex's first Seek chase and Mrs. C's Library from the DOORS mode of
 [3devann-lab/random-game](https://github.com/3devann-lab/random-game) (copied to `assets/games/library/`).
 It opens straight into the library with a single START GAME button (and full screen), on LOW graphics by default; the admin panel is
 disabled and escaping through the library's exit door verifies you. It loads three.js from a CDN, so it
