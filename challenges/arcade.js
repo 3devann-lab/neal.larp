@@ -294,7 +294,7 @@
     run(api, S, (dt) => {
       const inp = S.input;
       if (!started) { if (inp.pressed || laneIn.some((l) => l.pressed)) { started = true; } else return; }
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { reset(); attempts++; } return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; reset(); attempts++; } return; }
       beatT += dt;
       if (beatT >= 0.5) { beatT -= 0.5; api.sound.tone(90, 0.09, 'sine', 0.12); }
       lanes.forEach((L, i) => {
@@ -408,7 +408,7 @@
       const sw = S.input.swipe || pad.take();
       if (sw && D[sw]) { started = true; if (sw !== OPP[dir]) next = sw; }
       if (!started) return;
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) reset(); return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; reset(); } return; }
       acc += dt;
       if (acc < (cfg.speed || 0.13)) return;
       acc = 0;
@@ -533,12 +533,13 @@
       let flap = S.input.pressed;
       if (flap) started = true;
       if (!started) return;
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) reset(); return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; reset(); } return; }
       t += dt;
       if (bot) {
         const nextG = gates.find((gg) => gg.x + 36 > p.x - 10);
-        const target = nextG ? nextG.gy + gapH * 0.62 : H * 0.55;
-        flap = p.y + p.vy * 0.1 > target && p.vy > -40;
+        // a flap from rest rises ~38px, so flap near the bottom of the gap while falling
+        const threshold = nextG ? nextG.gy + gapH - 18 : H * 0.6;
+        flap = p.y > threshold && p.vy > 0;
       }
       if (flap) { p.vy = -250; api.sound.tone(500, 0.04, 'triangle', 0.04); }
       if (cfg.kite) { if (Math.random() < dt * 0.8) gust = rand(-260, 260); gust *= 0.98; p.vy += gust * dt; }
@@ -586,7 +587,7 @@
       const inp = S.input;
       if (inp.pressed || inp.moved || inp.keys.left || inp.keys.right) started = true;
       if (!started) return;
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) reset(); return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; reset(); } return; }
       t += dt; spawn -= dt;
       if (spawn <= 0) { spawn = Math.max(0.28, 0.75 - t * 0.03); items.push({ x: rand(10, W - 44), y: -26, w: 34, h: 24, v: rand(95, 135) + t * 4 }); }
       for (const it of items) it.y += it.v * dt;
@@ -638,7 +639,7 @@
     const S = stage(api, { w: W, h: H, label: 'Pong' });
     const coop = cfg.mode === 'coop';
     const PH = 46;
-    let py = H / 2, ry = H / 2, ball, you = 0, robot = 0, rally = 0, started = false, bot = false, wait = 0.6;
+    let py = H / 2, ry = H / 2, ball, you = 0, robot = 0, rally = 0, started = false, bot = false, wait = 0.6, aimErr = 0;
     const serve = (dirX) => { const a = rand(-0.5, 0.5); ball = { x: W / 2, y: H / 2, vx: Math.cos(a) * 170 * dirX, vy: Math.sin(a) * 170 }; wait = 0.6; };
     serve(-1);
     api.setBot(() => { bot = true; started = true; });
@@ -647,12 +648,12 @@
       if (inp.pressed || inp.moved || inp.keys.up || inp.keys.down) started = true;
       if (!started) return;
       const predict = (xTarget) => { if ((xTarget - ball.x) / ball.vx < 0) return H / 2; let t = (xTarget - ball.x) / ball.vx, y = ball.y + ball.vy * t; while (y < 0 || y > H) y = y < 0 ? -y : 2 * H - y; return y; };
-      if (bot) py += clamp(predict(16) - py, -380 * dt, 380 * dt);
+      if (bot) { const iy = predict(16); py += clamp(iy + (coop ? 0 : (iy < H / 2 ? 1 : -1) * PH * 0.36) - py, -380 * dt, 380 * dt); }
       else if (inp.keys.up || inp.keys.down) py += (inp.keys.down ? 1 : -1) * 300 * dt;
       else py += clamp(inp.y - py, -700 * dt, 700 * dt);
       py = clamp(py, PH / 2, H - PH / 2);
       const rs = cfg.robotSpeed || (coop ? 360 : 150);
-      const rt = ball.vx > 0 ? predict(W - 16) + (coop ? 0 : Math.sin(Date.now() / 300) * 18) : H / 2;
+      const rt = coop ? (ball.vx > 0 ? predict(W - 16) : H / 2) : (ball.vx > 0 && ball.x > W * 0.45 ? predict(W - 16) + aimErr : ry);
       ry = clamp(ry + clamp(rt - ry, -rs * dt, rs * dt), PH / 2, H - PH / 2);
       if (wait > 0) { wait -= dt; return; }
       ball.x += ball.vx * dt; ball.y += ball.vy * dt;
@@ -661,6 +662,7 @@
         const off = clamp((ball.y - padY) / (PH / 2), -1, 1);
         const sp = Math.min(Math.hypot(ball.vx, ball.vy) * 1.05, 330);
         ball.vx = side * Math.cos(off * 0.9) * sp; ball.vy = Math.sin(off * 0.9) * sp;
+        aimErr = rand(-1, 1) * PH * 0.55;
         if (coop) { rally++; api.sound.tone(500 + rally * 30, 0.05, 'square', 0.04); if (rally >= (cfg.rally || 10)) api.submit({ rally }); }
         else api.sound.tone(520, 0.05, 'square', 0.04);
       };
@@ -705,7 +707,7 @@
       if (mv) started = true;
       if (!started) return;
       for (const l of lanes) for (const c of l.cars) c.x = ((c.x + l.sp * dt) % COLS + COLS) % COLS;
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { px = 4; prow = ROWS - 1; } return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; px = 4; prow = ROWS - 1; } return; }
       hopT -= dt;
       if (bot && hopT <= 0) {
         const up = lanes[prow - 2];
@@ -758,7 +760,7 @@
       let drop = S.input.pressed;
       if (drop && !started) { started = true; drop = false; }
       if (!started) return;
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) reset(); return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; reset(); } return; }
       mover.x += dir * sp * dt;
       if (mover.x < -mover.w * 0.5) { mover.x = -mover.w * 0.5; dir = 1; }
       if (mover.x + mover.w > W + mover.w * 0.5) { mover.x = W + mover.w * 0.5 - mover.w; dir = -1; }
@@ -995,7 +997,7 @@
       const inp = S.input;
       if (inp.pressed) started = true;
       if (!started) return;
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) reset(); return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; reset(); } return; }
       let thrust = inp.down || inp.keys.up;
       if (bot) { const dist = PAD - (s.y + 16); const safeV = Math.sqrt(Math.max(0, 2 * (TH - grav) * dist * 0.75)) + 12; thrust = s.vy > Math.min(safeV, 140) || (dist < 20 && s.vy > 25); }
       s.thrust = thrust && s.fuel > 0;
@@ -1181,7 +1183,7 @@
       const inp = S.input;
       if (inp.pressed || inp.moved || inp.keys.left || inp.keys.right) started = true;
       if (!started) return;
-      if (deadT > 0) { deadT -= dt; if (deadT <= 0) reset(); return; }
+      if (deadT > 0) { deadT -= dt; if (deadT <= 0) { deadT = 0; reset(); } return; }
       t += dt;
       let targetAng;
       if (bot) targetAng = clamp(-(s * 0.006 + v * 0.012), -0.35, 0.35);
