@@ -70,7 +70,7 @@
       id: 3, act: 1, type: 'text',
       prompt: { small: 'Type the characters', big: 'you see below', sub: 'Not case sensitive. Mercifully.' },
       config: { render: 'distort', length: 6 },
-      validate: (a) => ({ ok: norm(a.typed).replace(/\s/g, '') === a.expected, msg: 'Close, but no. Here is a fresh one.' }),
+      validate: (a) => (norm(a.typed).replace(/\s/g, '') === a.expected ? true : { ok: false, msg: 'Close, but no. Here is a fresh one.' }),
       hint: 'Only lowercase letters and the digits 2–9 are used. No "l", "o", "1" or "0". Use ⟳ for a new one.',
     },
     {
@@ -93,7 +93,7 @@
       id: 5, act: 1, type: 'slider',
       prompt: { small: 'Drag the slider to', big: 'fit the puzzle piece', sub: 'Line it up with the dark gap.' },
       config: { mode: 'puzzle' },
-      validate: (a) => ({ ok: Math.abs(a.x - a.gapX) <= 6, msg: Math.abs(a.x - a.gapX) <= 18 ? 'So close. Pixels matter.' : 'The gap is somewhere else.' }),
+      validate: (a) => (Math.abs(a.x - a.gapX) <= 6 ? true : { ok: false, msg: Math.abs(a.x - a.gapX) <= 18 ? 'So close. Pixels matter.' : 'The gap is somewhere else.' }),
       hint: 'Let go when the piece sits exactly on top of the dark gap. You can also focus the handle and use the arrow keys, then press Enter.',
     },
     {
@@ -134,7 +134,7 @@
       id: 8, act: 1, type: 'audio',
       prompt: { small: 'Press play and', big: 'type the digits', sub: 'Turn your sound on. Or read them, we won\'t tell.' },
       config: { mode: 'digits', length: 5 },
-      validate: (a) => ({ ok: a.typed.replace(/\D/g, '') === a.expected, msg: "Those weren't the digits. Here are new ones." }),
+      validate: (a) => (a.typed.replace(/\D/g, '') === a.expected ? true : { ok: false, msg: "Those weren't the digits. Here are new ones." }),
       hint: 'Tap "Can\'t play audio? Read it instead" to see the digits written as words.',
     },
     {
